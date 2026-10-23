@@ -137,3 +137,16 @@ export function assertPermission(
   )
     throw new InputError("This branch is outside your authorized scope.");
 }
+
+// Shared records require the permission in every assigned branch.
+export function allScopes(
+  workspace: Awaited<ReturnType<typeof getWorkspace>>,
+  ids: string[],
+  permission: string,
+) {
+  return (
+    workspace.businessPermissions.has(permission) ||
+    (ids.length > 0 &&
+      ids.every((id) => workspace.branchPermissions.get(id)?.has(permission)))
+  );
+}

@@ -28,17 +28,37 @@ const groups = [
   {
     label: "LEARNING",
     links: [
-      { href: "/modules/students", label: "Students", icon: GraduationCap },
+      { href: "/students", label: "Students", icon: GraduationCap },
       { href: "/modules/courses", label: "Courses & groups", icon: BookOpen },
       { href: "/modules/schedule", label: "Schedule", icon: CalendarDays },
       { href: "/modules/attendance", label: "Attendance", icon: CheckSquare2 },
     ],
   },
   {
+    label: "SALES",
+    links: [
+      { href: "/sales", label: "Sales dashboard", icon: BarChart3 },
+      { href: "/leads", label: "Leads", icon: UserRoundPlus },
+      { href: "/sales/board", label: "Kanban pipeline", icon: LayoutDashboard },
+      { href: "/sales/follow-ups", label: "Follow-ups", icon: CheckSquare2 },
+      { href: "/sales/reports", label: "Sales reports", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "FINANCE",
+    links: [
+      {
+        href: "/finance",
+        label: "Financial foundation",
+        icon: CircleDollarSign,
+      },
+      { href: "/finance/cashboxes", label: "Cashboxes", icon: Building2 },
+    ],
+  },
+  {
     label: "BUSINESS",
     links: [
-      { href: "/modules/leads", label: "Leads", icon: UserRoundPlus },
-      { href: "/modules/finance", label: "Finance", icon: CircleDollarSign },
+      { href: "/customers", label: "Customers", icon: Users },
       { href: "/team", label: "Team & access", icon: Users },
       { href: "/employees", label: "Employees", icon: Users },
       { href: "/roles", label: "Roles & permissions", icon: Settings2 },
@@ -62,10 +82,18 @@ export function Navigation({ onNavigate }: { onNavigate?: () => void }) {
                 onClick={onNavigate}
                 key={href}
                 href={href}
-                aria-current={pathname === href ? "page" : undefined}
+                aria-current={
+                  pathname === href ||
+                  (!["/sales", "/finance"].includes(href) &&
+                    pathname.startsWith(href + "/"))
+                    ? "page"
+                    : undefined
+                }
                 className={cn(
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white",
-                  pathname === href &&
+                  (pathname === href ||
+                    (!["/sales", "/finance"].includes(href) &&
+                      pathname.startsWith(href + "/"))) &&
                     "bg-[#26493f] text-[#bcf2da] hover:bg-[#26493f]",
                 )}
               >

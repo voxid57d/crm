@@ -18,6 +18,152 @@ async function upgrade(db) {
   }
 }
 
+test("sales upgrade preserves populated customer/student/guardian records and history", async (t) => {
+  const db = await createTestDatabase({ migrationCount: 8 });
+  t.after(() => db.close());
+  await db.exec(
+    "insert into auth.users(id,email) values('62000000-0000-0000-0000-000000000001','sales-upgrade@example.test'); set request.jwt.claim.sub='62000000-0000-0000-0000-000000000001'",
+  );
+  const tenant = (
+    await db.query(
+      "select public.create_business('Existing customer business') id",
+    )
+  ).rows[0].id;
+  const branch = (await db.query("select id from public.branches")).rows[0].id;
+  const customer = (
+    await db.query("select public.save_customer($1,null,$2,$3,'{}',$4) id", [
+      tenant,
+      { first_name: "Existing student", phone: "99890123" },
+      [branch],
+      { student_identifier: "PRE-SALES", education_status: "active" },
+    ])
+  ).rows[0].id;
+  await db.query(
+    "select public.save_customer_note($1,$2,null,'Existing confidential note')",
+    [tenant, customer],
+  );
+  await db.query(
+    "select public.save_student_guardian($1,$2,null,'Existing parent','99890555','','Parent')",
+    [tenant, customer],
+  );
+  const before = (
+    await db.query(
+      "select to_jsonb(c) row from public.customers c where id=$1",
+      [customer],
+    )
+  ).rows[0].row;
+  const activityCount = (
+    await db.query("select count(*)::int n from public.customer_activities")
+  ).rows[0].n;
+  const directory = new URL("../supabase/migrations/", import.meta.url);
+  for (const file of (await readdir(directory))
+    .filter((f) => f.endsWith(".sql"))
+    .sort()
+    .slice(8))
+    await db.exec(await readFile(new URL(file, directory), "utf8"));
+  assert.deepEqual(
+    (
+      await db.query(
+        "select to_jsonb(c) row from public.customers c where id=$1",
+        [customer],
+      )
+    ).rows[0].row,
+    before,
+  );
+  assert.equal(
+    (await db.query("select count(*)::int n from public.customer_activities"))
+      .rows[0].n,
+    activityCount,
+  );
+  assert.equal(
+    (await db.query("select count(*)::int n from public.student_guardians"))
+      .rows[0].n,
+    1,
+  );
+  assert.equal(
+    (await db.query("select count(*)::int n from public.leads")).rows[0].n,
+    0,
+  );
+  assert.equal(
+    (await db.query("select count(*)::int n from public.sales_stages")).rows[0]
+      .n,
+    9,
+  );
+});
+
+test("customer upgrade preserves populated employees, exact salaries and membership roles", async (t) => {
+  const db = await createTestDatabase({ migrationCount: 5 });
+  t.after(() => db.close());
+  await db.exec(
+    "insert into auth.users(id,email) values('61000000-0000-0000-0000-000000000001','customer-upgrade@example.test'); set request.jwt.claim.sub='61000000-0000-0000-0000-000000000001'",
+  );
+  const tenant = (
+    await db.query(
+      "select public.create_business('Populated employee business') id",
+    )
+  ).rows[0].id;
+  const branch = (await db.query("select id from public.branches")).rows[0].id;
+  const employee = (
+    await db.query(
+      "select public.save_employee($1,null,'Existing employee','','','Teacher','active','2026-10-23','Preserved notes',$2) id",
+      [tenant, [branch]],
+    )
+  ).rows[0].id;
+  await db.query(
+    "select public.save_employee_salary($1,$2,'fixed_monthly','9007199254740993.12','','','','','UZS','Initial settings')",
+    [tenant, employee],
+  );
+  const before = (
+    await db.query("select role_id from public.tenant_memberships")
+  ).rows[0].role_id;
+  const directory = new URL("../supabase/migrations/", import.meta.url);
+  for (const file of (await readdir(directory))
+    .filter((f) => f.endsWith(".sql"))
+    .sort()
+    .slice(5))
+    await db.exec(await readFile(new URL(file, directory), "utf8"));
+  assert.equal(
+    (await db.query("select role_id from public.tenant_memberships")).rows[0]
+      .role_id,
+    before,
+  );
+  assert.equal(
+    (
+      await db.query("select notes from public.employees where id=$1", [
+        employee,
+      ])
+    ).rows[0].notes,
+    "Preserved notes",
+  );
+  assert.equal(
+    (
+      await db.query(
+        "select public.get_employee_salary($1,$2)->>'amount' amount",
+        [tenant, employee],
+      )
+    ).rows[0].amount,
+    "9007199254740993.12",
+  );
+  assert.equal(
+    (
+      await db.query(
+        "select count(*)::int n from public.customer_statuses where tenant_id=$1",
+        [tenant],
+      )
+    ).rows[0].n,
+    5,
+  );
+  assert.equal(
+    (
+      await db.query(
+        "select private.has_permission($1,'customers.manage_settings') allowed",
+        [tenant],
+      )
+    ).rows[0].allowed,
+    true,
+  );
+});
+
 test("tenant-defined role upgrade preserves existing memberships and assigned branches", async (t) => {
   const db = await createTestDatabase({ migrationCount: 3 });
   t.after(() => db.close());

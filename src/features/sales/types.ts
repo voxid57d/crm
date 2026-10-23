@@ -1,0 +1,55 @@
+import type { Database } from "@/lib/supabase/schema";
+type Tables = Database["public"]["Tables"];
+export type Lead = Tables["leads"]["Row"];
+export type Pipeline = Tables["sales_pipelines"]["Row"];
+export type Stage = Tables["sales_stages"]["Row"];
+export type Followup = Tables["lead_followups"]["Row"];
+export type LeadCard = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  priority: string;
+  branch_id: string;
+  pipeline_id: string;
+  stage_id: string;
+  status: string;
+  assigned_employee_id: string | null;
+  employee_name: string | null;
+  next_follow_up: string | null;
+  created_at: string;
+  archived: boolean;
+};
+export type LeadFeed = {
+  rows: LeadCard[];
+  total: number;
+  stage_counts: Record<string, number>;
+};
+export type FollowupCard = {
+  id: string;
+  lead_id: string;
+  lead_name: string;
+  branch_id: string;
+  responsible_employee_id: string;
+  employee_name: string;
+  kind: string;
+  description: string;
+  scheduled_at: string;
+  completed_at: string | null;
+  outcome_notes: string | null;
+};
+export type Breakdown = { label: string; count: number };
+export type Analytics = {
+  total: number;
+  converted: number;
+  lost: number;
+  disqualified: number;
+  new_leads: number;
+  conversion_rate: number;
+  overdue_followups: number;
+  sources: Breakdown[];
+  stages: Breakdown[];
+  employees: Breakdown[];
+  branches: Breakdown[];
+  trend: Breakdown[];
+};

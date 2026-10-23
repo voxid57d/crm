@@ -33,6 +33,9 @@ export default async function ModulePage({
   await requireUser();
   if (slug === "branches") redirect("/branches");
   if (slug === "team") redirect("/team");
+  if (slug === "students") redirect("/students");
+  if (slug === "leads") redirect("/leads");
+  if (slug === "finance") redirect("/finance");
   const entry = modules.find((item) => item.slug === slug);
   if (!entry) notFound();
   return (

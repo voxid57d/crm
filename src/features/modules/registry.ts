@@ -2,7 +2,7 @@ export const modules = [
   {
     slug: "students",
     title: "Students",
-    description: "Student profiles, contacts, and enrollment history.",
+    description: "Shared customer contacts, student details, and guardians.",
     category: "Learning",
   },
   {
@@ -32,7 +32,7 @@ export const modules = [
   {
     slug: "finance",
     title: "Finance",
-    description: "Invoices, payments, and account balances.",
+    description: "Cashboxes, exact balances, and immutable posting history.",
     category: "Business",
   },
   {

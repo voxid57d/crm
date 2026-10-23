@@ -37,7 +37,18 @@ export function AppShell({
             ? "Team & access"
             : pathname.startsWith("/businesses")
               ? "Your businesses"
-              : "Modules";
+              : pathname.startsWith("/customers")
+                ? "Customers"
+                : pathname === "/students"
+                  ? "Students"
+                  : pathname.startsWith("/employees")
+                    ? "Employees"
+                    : pathname === "/roles"
+                      ? "Roles & permissions"
+                      : pathname.startsWith("/sales") ||
+                          pathname.startsWith("/leads")
+                        ? "Sales CRM"
+                        : "Modules";
   return (
     <div className="min-h-screen">
       <a

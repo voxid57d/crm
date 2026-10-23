@@ -3,17 +3,7 @@ import { notFound } from "next/navigation";
 import { getWorkspace } from "@/features/workspace/context";
 import { uuid } from "@/lib/validation.mjs";
 
-export function allScopes(
-  workspace: Awaited<ReturnType<typeof getWorkspace>>,
-  ids: string[],
-  permission: string,
-) {
-  return (
-    workspace.businessPermissions.has(permission) ||
-    (ids.length > 0 &&
-      ids.every((id) => workspace.branchPermissions.get(id)?.has(permission)))
-  );
-}
+export { allScopes } from "@/features/workspace/context";
 export async function getEmployee(id: string) {
   const workspace = await getWorkspace();
   try {

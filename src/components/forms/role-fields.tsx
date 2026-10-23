@@ -40,9 +40,12 @@ export function RoleFields({
       )}
       <p className="text-xs leading-5 text-muted-foreground">
         Branch roles operate only where explicitly assigned. Role management is
-        business-wide only. Customer, lead, payment, cashbox, learning and
-        report permissions reserve future capabilities; those modules are not
-        implemented.
+        business-wide only. Customer settings and tag configuration also require
+        business-wide grants. Sales pipeline/source configuration requires
+        business-wide sales grants. Cashbox management, balance adjustments and
+        audit viewing have separate permissions; business-wide cashboxes require
+        business-wide grants. Payment, learning and general report permissions
+        reserve future capabilities.
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {Array.from(groups, ([group, items]) => (

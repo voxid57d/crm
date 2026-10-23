@@ -1,257 +1,2301 @@
-// Foundation schema contract. Regenerate with `npm run db:types` once local
-// Supabase is running, and commit the generated result with schema changes.
-import type {
-  Employee,
-  BusinessRole,
-  SalaryConfig,
-  SalaryEvent,
-  InvitationPreview,
-} from "@/features/employees/types";
-type Table<Row, Insert, Update = Partial<Insert>> = {
-  Row: Row;
-  Insert: Insert;
-  Update: Update;
-  Relationships: [];
-};
-export type AppRole =
-  "owner" | "admin" | "manager" | "employee" | "teacher" | "staff";
-type Tenant = {
-  id: string;
-  name: string;
-  slug: string;
-  business_type: string;
-  created_at: string;
-  contact_email: string;
-  phone: string;
-  address: string;
-  currency: string;
-  timezone: string;
-  owner_id: string;
-};
-type Branch = {
-  id: string;
-  tenant_id: string;
-  name: string;
-  created_at: string;
-  address: string;
-  phone: string;
-  is_active: boolean;
-};
-type Membership = {
-  role_id: string;
-  tenant_id: string;
-  user_id: string;
-  role: AppRole;
-  is_active: boolean;
-  created_at: string;
-};
-type BranchMembership = {
-  role_id: string | null;
-  tenant_id: string;
-  branch_id: string;
-  user_id: string;
-  created_at: string;
-};
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
+
 export type Database = {
   public: {
     Tables: {
-      employees: Table<
-        Employee,
-        Omit<Employee, "id" | "created_at" | "updated_at">
-      >;
-      employee_branches: Table<
-        { tenant_id: string; employee_id: string; branch_id: string },
-        { tenant_id: string; employee_id: string; branch_id: string }
-      >;
-      business_roles: Table<
-        BusinessRole,
-        { tenant_id: string; name: string; scope: string }
-      >;
-      business_role_permissions: Table<
-        { tenant_id: string; role_id: string; permission: string },
-        { tenant_id: string; role_id: string; permission: string }
-      >;
-      permissions: Table<
-        { key: string; description: string; assignable: boolean },
-        { key: string; description: string }
-      >;
-      tenants: Table<
-        Tenant,
-        {
-          id?: string;
-          name: string;
-          slug: string;
-          business_type?: string;
-          created_at?: string;
-          owner_id: string;
-          contact_email?: string;
-          phone?: string;
-          address?: string;
-          currency?: string;
-          timezone?: string;
-        }
-      >;
-      branches: Table<
-        Branch,
-        {
-          id?: string;
-          tenant_id: string;
-          name: string;
-          created_at?: string;
-          address?: string;
-          phone?: string;
-          is_active?: boolean;
-        }
-      >;
-      tenant_memberships: Table<
-        Membership,
-        {
-          tenant_id: string;
-          user_id: string;
-          role?: AppRole;
-          role_id?: string;
-          is_active?: boolean;
-          created_at?: string;
-        }
-      >;
-      branch_memberships: Table<
-        BranchMembership,
-        {
-          tenant_id: string;
+      branch_memberships: {
+        Row: {
           branch_id: string;
-          role_id?: string | null;
+          created_at: string;
+          role_id: string | null;
+          tenant_id: string;
           user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
           created_at?: string;
-        }
-      >;
-      role_permissions: Table<
-        { role: AppRole; permission: string },
-        { role: AppRole; permission: string }
-      >;
-      profiles: Table<
-        { id: string; full_name: string; phone: string; created_at: string },
-        { id: string; full_name?: string; phone?: string; created_at?: string }
-      >;
+          role_id?: string | null;
+          tenant_id: string;
+          user_id: string;
+        };
+        Update: {
+          branch_id?: string;
+          created_at?: string;
+          role_id?: string | null;
+          tenant_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "branch_memberships_tenant_id_branch_id_fkey";
+            columns: ["tenant_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "branch_memberships_tenant_id_role_id_fkey";
+            columns: ["tenant_id", "role_id"];
+            isOneToOne: false;
+            referencedRelation: "business_roles";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "branch_memberships_tenant_id_user_id_fkey";
+            columns: ["tenant_id", "user_id"];
+            isOneToOne: false;
+            referencedRelation: "tenant_memberships";
+            referencedColumns: ["tenant_id", "user_id"];
+          },
+        ];
+      };
+      branches: {
+        Row: {
+          address: string;
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          phone: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          address?: string;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          phone?: string;
+          tenant_id: string;
+        };
+        Update: {
+          address?: string;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          phone?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "branches_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      business_role_permissions: {
+        Row: {
+          permission: string;
+          role_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          permission: string;
+          role_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          permission?: string;
+          role_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "business_role_permissions_permission_fkey";
+            columns: ["permission"];
+            isOneToOne: false;
+            referencedRelation: "permissions";
+            referencedColumns: ["key"];
+          },
+          {
+            foreignKeyName: "business_role_permissions_tenant_id_role_id_fkey";
+            columns: ["tenant_id", "role_id"];
+            isOneToOne: false;
+            referencedRelation: "business_roles";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      business_roles: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string;
+          scope: string;
+          system_key: string | null;
+          tenant_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name: string;
+          scope: string;
+          system_key?: string | null;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string;
+          scope?: string;
+          system_key?: string | null;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "business_roles_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      cashboxes: {
+        Row: {
+          branch_id: string | null;
+          cashbox_type: string;
+          created_at: string;
+          created_by: string;
+          creation_key: string;
+          creation_payload: NonNullable<Json>;
+          currency: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          tenant_id: string;
+          updated_at: string;
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id?: string | null;
+          cashbox_type: string;
+          created_at?: string;
+          created_by: string;
+          creation_key: string;
+          creation_payload: NonNullable<Json>;
+          currency?: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          tenant_id: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Update: {
+          branch_id?: string | null;
+          cashbox_type?: string;
+          created_at?: string;
+          created_by?: string;
+          creation_key?: string;
+          creation_payload?: NonNullable<Json>;
+          currency?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          tenant_id?: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "cashboxes_currency_fkey";
+            columns: ["currency"];
+            isOneToOne: false;
+            referencedRelation: "finance_currencies";
+            referencedColumns: ["code"];
+          },
+          {
+            foreignKeyName: "cashboxes_tenant_id_branch_id_fkey";
+            columns: ["tenant_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "cashboxes_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      customer_activities: {
+        Row: {
+          actor_id: string;
+          actor_name: string;
+          created_at: string;
+          customer_id: string;
+          detail: NonNullable<Json>;
+          id: string;
+          kind: string;
+          notes_only: boolean;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id: string;
+          actor_name: string;
+          created_at?: string;
+          customer_id: string;
+          detail?: NonNullable<Json>;
+          id?: string;
+          kind: string;
+          notes_only?: boolean;
+          tenant_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          actor_name?: string;
+          created_at?: string;
+          customer_id?: string;
+          detail?: NonNullable<Json>;
+          id?: string;
+          kind?: string;
+          notes_only?: boolean;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_activities_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      customer_branches: {
+        Row: {
+          branch_id: string;
+          customer_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          customer_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          branch_id?: string;
+          customer_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_branches_tenant_id_branch_id_fkey";
+            columns: ["tenant_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "customer_branches_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      customer_field_definitions: {
+        Row: {
+          created_at: string;
+          field_type: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          field_type: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          field_type?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_field_definitions_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      customer_field_values: {
+        Row: {
+          customer_id: string;
+          field_id: string;
+          tenant_id: string;
+          value: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          customer_id: string;
+          field_id: string;
+          tenant_id: string;
+          value: string;
+        };
+        Update: {
+          customer_id?: string;
+          field_id?: string;
+          tenant_id?: string;
+          value?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_field_values_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "customer_field_values_tenant_id_field_id_fkey";
+            columns: ["tenant_id", "field_id"];
+            isOneToOne: false;
+            referencedRelation: "customer_field_definitions";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      customer_notes: {
+        Row: {
+          author_id: string;
+          author_name: string;
+          body: string;
+          created_at: string;
+          customer_id: string;
+          id: string;
+          kind: string;
+          tenant_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          author_id: string;
+          author_name: string;
+          body: string;
+          created_at?: string;
+          customer_id: string;
+          id?: string;
+          kind: string;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          author_id?: string;
+          author_name?: string;
+          body?: string;
+          created_at?: string;
+          customer_id?: string;
+          id?: string;
+          kind?: string;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_notes_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      customer_statuses: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          is_default: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          is_default?: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          is_default?: boolean;
+          name?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_statuses_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      customer_tag_links: {
+        Row: {
+          customer_id: string;
+          tag_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          customer_id: string;
+          tag_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          customer_id?: string;
+          tag_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_tag_links_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "customer_tag_links_tenant_id_tag_id_fkey";
+            columns: ["tenant_id", "tag_id"];
+            isOneToOne: false;
+            referencedRelation: "customer_tags";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      customer_tags: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customer_tags_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      customers: {
+        Row: {
+          additional_phone: string | null;
+          address: string | null;
+          archived_at: string | null;
+          created_at: string;
+          date_of_birth: string | null;
+          email: string | null;
+          first_name: string;
+          gender: string | null;
+          id: string;
+          last_name: string;
+          phone: string;
+          responsible_employee_id: string | null;
+          status_id: string;
+          tenant_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          additional_phone?: string | null;
+          address?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          date_of_birth?: string | null;
+          email?: string | null;
+          first_name: string;
+          gender?: string | null;
+          id?: string;
+          last_name?: string;
+          phone: string;
+          responsible_employee_id?: string | null;
+          status_id: string;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          additional_phone?: string | null;
+          address?: string | null;
+          archived_at?: string | null;
+          created_at?: string;
+          date_of_birth?: string | null;
+          email?: string | null;
+          first_name?: string;
+          gender?: string | null;
+          id?: string;
+          last_name?: string;
+          phone?: string;
+          responsible_employee_id?: string | null;
+          status_id?: string;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "customers_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "customers_tenant_id_responsible_employee_id_fkey";
+            columns: ["tenant_id", "responsible_employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "customers_tenant_id_status_id_fkey";
+            columns: ["tenant_id", "status_id"];
+            isOneToOne: false;
+            referencedRelation: "customer_statuses";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      employee_branches: {
+        Row: {
+          branch_id: string;
+          employee_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          employee_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          branch_id?: string;
+          employee_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employee_branches_tenant_id_branch_id_fkey";
+            columns: ["tenant_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "employee_branches_tenant_id_employee_id_fkey";
+            columns: ["tenant_id", "employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      employee_invitations: {
+        Row: {
+          accepted_at: string | null;
+          created_at: string;
+          email: string;
+          employee_id: string;
+          expires_at: string;
+          id: string;
+          invited_by: string;
+          revoked_at: string | null;
+          role_id: string;
+          tenant_id: string;
+          token_hash: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          accepted_at?: string | null;
+          created_at?: string;
+          email: string;
+          employee_id: string;
+          expires_at?: string;
+          id?: string;
+          invited_by: string;
+          revoked_at?: string | null;
+          role_id: string;
+          tenant_id: string;
+          token_hash: string;
+        };
+        Update: {
+          accepted_at?: string | null;
+          created_at?: string;
+          email?: string;
+          employee_id?: string;
+          expires_at?: string;
+          id?: string;
+          invited_by?: string;
+          revoked_at?: string | null;
+          role_id?: string;
+          tenant_id?: string;
+          token_hash?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employee_invitations_tenant_id_employee_id_fkey";
+            columns: ["tenant_id", "employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "employee_invitations_tenant_id_role_id_fkey";
+            columns: ["tenant_id", "role_id"];
+            isOneToOne: false;
+            referencedRelation: "business_roles";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      employee_salary_history: {
+        Row: {
+          changed_by: string;
+          created_at: string;
+          employee_id: string;
+          id: string;
+          new_settings: NonNullable<Json>;
+          previous_settings: Json | null;
+          reason: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          changed_by: string;
+          created_at?: string;
+          employee_id: string;
+          id?: string;
+          new_settings: NonNullable<Json>;
+          previous_settings?: Json | null;
+          reason: string;
+          tenant_id: string;
+        };
+        Update: {
+          changed_by?: string;
+          created_at?: string;
+          employee_id?: string;
+          id?: string;
+          new_settings?: NonNullable<Json>;
+          previous_settings?: Json | null;
+          reason?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employee_salary_history_tenant_id_employee_id_fkey";
+            columns: ["tenant_id", "employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      employee_salary_settings: {
+        Row: {
+          amount: number | null;
+          bonus_amount: number | null;
+          bonus_basis: string;
+          bonus_percentage: number | null;
+          currency: string;
+          employee_id: string;
+          percentage: number | null;
+          salary_type: string;
+          tenant_id: string;
+          updated_at: string;
+          updated_by: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount?: number | null;
+          bonus_amount?: number | null;
+          bonus_basis?: string;
+          bonus_percentage?: number | null;
+          currency: string;
+          employee_id: string;
+          percentage?: number | null;
+          salary_type: string;
+          tenant_id: string;
+          updated_at?: string;
+          updated_by: string;
+        };
+        Update: {
+          amount?: number | null;
+          bonus_amount?: number | null;
+          bonus_basis?: string;
+          bonus_percentage?: number | null;
+          currency?: string;
+          employee_id?: string;
+          percentage?: number | null;
+          salary_type?: string;
+          tenant_id?: string;
+          updated_at?: string;
+          updated_by?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employee_salary_settings_tenant_id_employee_id_fkey";
+            columns: ["tenant_id", "employee_id"];
+            isOneToOne: true;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      employees: {
+        Row: {
+          created_at: string;
+          email: string | null;
+          full_name: string;
+          id: string;
+          job_title: string;
+          notes: string;
+          phone: string;
+          start_date: string;
+          status: string;
+          tenant_id: string;
+          updated_at: string;
+          user_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          email?: string | null;
+          full_name: string;
+          id?: string;
+          job_title?: string;
+          notes?: string;
+          phone?: string;
+          start_date: string;
+          status?: string;
+          tenant_id: string;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          email?: string | null;
+          full_name?: string;
+          id?: string;
+          job_title?: string;
+          notes?: string;
+          phone?: string;
+          start_date?: string;
+          status?: string;
+          tenant_id?: string;
+          updated_at?: string;
+          user_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "employees_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "employees_tenant_id_user_id_fkey";
+            columns: ["tenant_id", "user_id"];
+            isOneToOne: true;
+            referencedRelation: "tenant_memberships";
+            referencedColumns: ["tenant_id", "user_id"];
+          },
+        ];
+      };
+      finance_currencies: {
+        Row: {
+          code: string;
+          minor_units: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          code: string;
+          minor_units: number;
+        };
+        Update: {
+          code?: string;
+          minor_units?: number;
+        };
+        Relationships: [];
+      };
+      financial_audit_events: {
+        Row: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data: Json | null;
+          cashbox_id: string;
+          created_at: string;
+          id: string;
+          operation: string;
+          reason: string;
+          tenant_id: string;
+          transaction_id: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data?: Json | null;
+          cashbox_id: string;
+          created_at?: string;
+          id?: string;
+          operation: string;
+          reason?: string;
+          tenant_id: string;
+          transaction_id?: string | null;
+        };
+        Update: {
+          actor_id?: string;
+          actor_name?: string;
+          after_data?: NonNullable<Json>;
+          before_data?: Json | null;
+          cashbox_id?: string;
+          created_at?: string;
+          id?: string;
+          operation?: string;
+          reason?: string;
+          tenant_id?: string;
+          transaction_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "financial_audit_events_tenant_id_cashbox_id_fkey";
+            columns: ["tenant_id", "cashbox_id"];
+            isOneToOne: false;
+            referencedRelation: "cashboxes";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "financial_audit_events_tenant_id_transaction_id_fkey";
+            columns: ["tenant_id", "transaction_id"];
+            isOneToOne: false;
+            referencedRelation: "financial_transactions";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      financial_ledger_entries: {
+        Row: {
+          amount: number;
+          cashbox_id: string;
+          currency: string;
+          id: string;
+          kind: string;
+          tenant_id: string;
+          transaction_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount: number;
+          cashbox_id: string;
+          currency: string;
+          id?: string;
+          kind: string;
+          tenant_id: string;
+          transaction_id: string;
+        };
+        Update: {
+          amount?: number;
+          cashbox_id?: string;
+          currency?: string;
+          id?: string;
+          kind?: string;
+          tenant_id?: string;
+          transaction_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "financial_ledger_entries_tenant_id_cashbox_id_currency_fkey";
+            columns: ["tenant_id", "cashbox_id", "currency"];
+            isOneToOne: false;
+            referencedRelation: "cashboxes";
+            referencedColumns: ["tenant_id", "id", "currency"];
+          },
+          {
+            foreignKeyName: "financial_ledger_entries_tenant_id_transaction_id_kind_cur_fkey";
+            columns: ["tenant_id", "transaction_id", "kind", "currency"];
+            isOneToOne: false;
+            referencedRelation: "financial_transactions";
+            referencedColumns: ["tenant_id", "id", "kind", "currency"];
+          },
+        ];
+      };
+      financial_transactions: {
+        Row: {
+          actor_id: string;
+          actor_name: string;
+          currency: string;
+          employee_id: string | null;
+          id: string;
+          idempotency_key: string;
+          kind: string;
+          posted_at: string;
+          reason: string;
+          request_payload: NonNullable<Json>;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id: string;
+          actor_name: string;
+          currency: string;
+          employee_id?: string | null;
+          id?: string;
+          idempotency_key: string;
+          kind: string;
+          posted_at?: string;
+          reason: string;
+          request_payload: NonNullable<Json>;
+          tenant_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          actor_name?: string;
+          currency?: string;
+          employee_id?: string | null;
+          id?: string;
+          idempotency_key?: string;
+          kind?: string;
+          posted_at?: string;
+          reason?: string;
+          request_payload?: NonNullable<Json>;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "financial_transactions_currency_fkey";
+            columns: ["currency"];
+            isOneToOne: false;
+            referencedRelation: "finance_currencies";
+            referencedColumns: ["code"];
+          },
+          {
+            foreignKeyName: "financial_transactions_tenant_id_employee_id_fkey";
+            columns: ["tenant_id", "employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "financial_transactions_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      guardians: {
+        Row: {
+          created_at: string;
+          email: string | null;
+          full_name: string;
+          id: string;
+          phone: string;
+          tenant_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          email?: string | null;
+          full_name: string;
+          id?: string;
+          phone: string;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          email?: string | null;
+          full_name?: string;
+          id?: string;
+          phone?: string;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "guardians_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      lead_activities: {
+        Row: {
+          actor_id: string;
+          actor_name: string;
+          created_at: string;
+          detail: NonNullable<Json>;
+          id: string;
+          kind: string;
+          lead_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id: string;
+          actor_name: string;
+          created_at?: string;
+          detail?: NonNullable<Json>;
+          id?: string;
+          kind: string;
+          lead_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          actor_name?: string;
+          created_at?: string;
+          detail?: NonNullable<Json>;
+          id?: string;
+          kind?: string;
+          lead_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lead_activities_tenant_id_lead_id_fkey";
+            columns: ["tenant_id", "lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      lead_followups: {
+        Row: {
+          completed_at: string | null;
+          completed_by: string | null;
+          created_at: string;
+          description: string;
+          id: string;
+          kind: string;
+          lead_id: string;
+          outcome_notes: string | null;
+          responsible_employee_id: string;
+          scheduled_at: string;
+          tenant_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          completed_at?: string | null;
+          completed_by?: string | null;
+          created_at?: string;
+          description: string;
+          id?: string;
+          kind: string;
+          lead_id: string;
+          outcome_notes?: string | null;
+          responsible_employee_id: string;
+          scheduled_at: string;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          completed_at?: string | null;
+          completed_by?: string | null;
+          created_at?: string;
+          description?: string;
+          id?: string;
+          kind?: string;
+          lead_id?: string;
+          outcome_notes?: string | null;
+          responsible_employee_id?: string;
+          scheduled_at?: string;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lead_followups_tenant_id_lead_id_fkey";
+            columns: ["tenant_id", "lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "lead_followups_tenant_id_responsible_employee_id_fkey";
+            columns: ["tenant_id", "responsible_employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      lead_loss_reasons: {
+        Row: {
+          id: string;
+          is_active: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        Update: {
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lead_loss_reasons_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      lead_notes: {
+        Row: {
+          author_id: string;
+          author_name: string;
+          body: string;
+          created_at: string;
+          id: string;
+          kind: string;
+          lead_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          author_id: string;
+          author_name: string;
+          body: string;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          lead_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          author_id?: string;
+          author_name?: string;
+          body?: string;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          lead_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lead_notes_tenant_id_lead_id_fkey";
+            columns: ["tenant_id", "lead_id"];
+            isOneToOne: false;
+            referencedRelation: "leads";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      lead_sources: {
+        Row: {
+          id: string;
+          is_active: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        Update: {
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lead_sources_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      leads: {
+        Row: {
+          archived_at: string | null;
+          assigned_employee_id: string | null;
+          branch_id: string;
+          converted_at: string | null;
+          converted_by: string | null;
+          created_at: string;
+          customer_id: string | null;
+          email: string | null;
+          first_name: string;
+          id: string;
+          interested_service: string | null;
+          last_name: string;
+          loss_notes: string | null;
+          loss_reason_id: string | null;
+          lost_at: string | null;
+          lost_by: string | null;
+          phone: string;
+          phone_normalized: string | null;
+          pipeline_id: string;
+          priority: string;
+          secondary_phone: string | null;
+          source_id: string | null;
+          stage_id: string;
+          status: string;
+          tenant_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          archived_at?: string | null;
+          assigned_employee_id?: string | null;
+          branch_id: string;
+          converted_at?: string | null;
+          converted_by?: string | null;
+          created_at?: string;
+          customer_id?: string | null;
+          email?: string | null;
+          first_name: string;
+          id?: string;
+          interested_service?: string | null;
+          last_name?: string;
+          loss_notes?: string | null;
+          loss_reason_id?: string | null;
+          lost_at?: string | null;
+          lost_by?: string | null;
+          phone: string;
+          phone_normalized?: never;
+          pipeline_id: string;
+          priority?: string;
+          secondary_phone?: string | null;
+          source_id?: string | null;
+          stage_id: string;
+          status?: string;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          archived_at?: string | null;
+          assigned_employee_id?: string | null;
+          branch_id?: string;
+          converted_at?: string | null;
+          converted_by?: string | null;
+          created_at?: string;
+          customer_id?: string | null;
+          email?: string | null;
+          first_name?: string;
+          id?: string;
+          interested_service?: string | null;
+          last_name?: string;
+          loss_notes?: string | null;
+          loss_reason_id?: string | null;
+          lost_at?: string | null;
+          lost_by?: string | null;
+          phone?: string;
+          phone_normalized?: never;
+          pipeline_id?: string;
+          priority?: string;
+          secondary_phone?: string | null;
+          source_id?: string | null;
+          stage_id?: string;
+          status?: string;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "leads_tenant_id_assigned_employee_id_fkey";
+            columns: ["tenant_id", "assigned_employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "leads_tenant_id_branch_id_fkey";
+            columns: ["tenant_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "leads_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "leads_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "leads_tenant_id_loss_reason_id_fkey";
+            columns: ["tenant_id", "loss_reason_id"];
+            isOneToOne: false;
+            referencedRelation: "lead_loss_reasons";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "leads_tenant_id_pipeline_id_stage_id_fkey";
+            columns: ["tenant_id", "pipeline_id", "stage_id"];
+            isOneToOne: false;
+            referencedRelation: "sales_stages";
+            referencedColumns: ["tenant_id", "pipeline_id", "id"];
+          },
+          {
+            foreignKeyName: "leads_tenant_id_source_id_fkey";
+            columns: ["tenant_id", "source_id"];
+            isOneToOne: false;
+            referencedRelation: "lead_sources";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      permissions: {
+        Row: {
+          assignable: boolean;
+          description: string;
+          key: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          assignable?: boolean;
+          description: string;
+          key: string;
+        };
+        Update: {
+          assignable?: boolean;
+          description?: string;
+          key?: string;
+        };
+        Relationships: [];
+      };
+      profiles: {
+        Row: {
+          created_at: string;
+          full_name: string;
+          id: string;
+          phone: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          full_name?: string;
+          id: string;
+          phone?: string;
+        };
+        Update: {
+          created_at?: string;
+          full_name?: string;
+          id?: string;
+          phone?: string;
+        };
+        Relationships: [];
+      };
+      role_permissions: {
+        Row: {
+          permission: string;
+          role: Database["public"]["Enums"]["app_role"];
+        };
+        ComputedFields: never;
+        Insert: {
+          permission: string;
+          role: Database["public"]["Enums"]["app_role"];
+        };
+        Update: {
+          permission?: string;
+          role?: Database["public"]["Enums"]["app_role"];
+        };
+        Relationships: [];
+      };
+      sales_configuration_history: {
+        Row: {
+          actor_id: string;
+          after_value: NonNullable<Json>;
+          before_value: Json | null;
+          created_at: string;
+          id: string;
+          kind: string;
+          record_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id: string;
+          after_value: NonNullable<Json>;
+          before_value?: Json | null;
+          created_at?: string;
+          id?: string;
+          kind: string;
+          record_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          after_value?: NonNullable<Json>;
+          before_value?: Json | null;
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          record_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "sales_configuration_history_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      sales_pipelines: {
+        Row: {
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          is_default: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          is_default?: boolean;
+          name: string;
+          tenant_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          is_default?: boolean;
+          name?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "sales_pipelines_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      sales_stages: {
+        Row: {
+          color: string;
+          created_at: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          outcome: string;
+          pipeline_id: string;
+          position: number;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          color?: string;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          outcome?: string;
+          pipeline_id: string;
+          position: number;
+          tenant_id: string;
+        };
+        Update: {
+          color?: string;
+          created_at?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          outcome?: string;
+          pipeline_id?: string;
+          position?: number;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "sales_stages_tenant_id_pipeline_id_fkey";
+            columns: ["tenant_id", "pipeline_id"];
+            isOneToOne: false;
+            referencedRelation: "sales_pipelines";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      student_guardians: {
+        Row: {
+          customer_id: string;
+          guardian_id: string;
+          is_emergency: boolean;
+          relationship: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          customer_id: string;
+          guardian_id: string;
+          is_emergency?: boolean;
+          relationship: string;
+          tenant_id: string;
+        };
+        Update: {
+          customer_id?: string;
+          guardian_id?: string;
+          is_emergency?: boolean;
+          relationship?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_guardians_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "student_profiles";
+            referencedColumns: ["tenant_id", "customer_id"];
+          },
+          {
+            foreignKeyName: "student_guardians_tenant_id_guardian_id_fkey";
+            columns: ["tenant_id", "guardian_id"];
+            isOneToOne: false;
+            referencedRelation: "guardians";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      student_profiles: {
+        Row: {
+          additional_information: string | null;
+          created_at: string;
+          customer_id: string;
+          education_level: string | null;
+          education_status: string;
+          enrollment_date: string | null;
+          learning_goals: string | null;
+          school: string | null;
+          student_identifier: string;
+          tenant_id: string;
+          updated_at: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          additional_information?: string | null;
+          created_at?: string;
+          customer_id: string;
+          education_level?: string | null;
+          education_status?: string;
+          enrollment_date?: string | null;
+          learning_goals?: string | null;
+          school?: string | null;
+          student_identifier: string;
+          tenant_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          additional_information?: string | null;
+          created_at?: string;
+          customer_id?: string;
+          education_level?: string | null;
+          education_status?: string;
+          enrollment_date?: string | null;
+          learning_goals?: string | null;
+          school?: string | null;
+          student_identifier?: string;
+          tenant_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_profiles_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: true;
+            referencedRelation: "customers";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      tenant_memberships: {
+        Row: {
+          created_at: string;
+          is_active: boolean;
+          role: Database["public"]["Enums"]["app_role"];
+          role_id: string;
+          tenant_id: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          is_active?: boolean;
+          role?: Database["public"]["Enums"]["app_role"];
+          role_id: string;
+          tenant_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          is_active?: boolean;
+          role?: Database["public"]["Enums"]["app_role"];
+          role_id?: string;
+          tenant_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tenant_memberships_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tenant_memberships_tenant_id_role_id_fkey";
+            columns: ["tenant_id", "role_id"];
+            isOneToOne: false;
+            referencedRelation: "business_roles";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      tenants: {
+        Row: {
+          address: string;
+          business_type: string;
+          contact_email: string;
+          created_at: string;
+          currency: string;
+          id: string;
+          name: string;
+          owner_id: string;
+          phone: string;
+          slug: string;
+          timezone: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          address?: string;
+          business_type?: string;
+          contact_email?: string;
+          created_at?: string;
+          currency?: string;
+          id?: string;
+          name: string;
+          owner_id: string;
+          phone?: string;
+          slug: string;
+          timezone?: string;
+        };
+        Update: {
+          address?: string;
+          business_type?: string;
+          contact_email?: string;
+          created_at?: string;
+          currency?: string;
+          id?: string;
+          name?: string;
+          owner_id?: string;
+          phone?: string;
+          slug?: string;
+          timezone?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tenant_owner_membership_fk";
+            columns: ["id", "owner_id"];
+            isOneToOne: false;
+            referencedRelation: "tenant_memberships";
+            referencedColumns: ["tenant_id", "user_id"];
+          },
+        ];
+      };
     };
-    Views: { [_ in never]: never };
+    Views: {
+      [_ in never]: never;
+    };
     Functions: {
-      archive_employee: {
-        Args: { p_tenant: string; p_employee: string };
-        Returns: undefined;
-      };
-      permission_grants: {
-        Args: { p_tenant: string };
-        Returns: { permission: string; branch_id: string | null }[];
-      };
-      save_employee: {
-        Args: {
-          p_tenant: string;
-          p_id: string | null;
-          p_full_name: string;
-          p_phone: string;
-          p_email: string;
-          p_job_title: string;
-          p_status: string;
-          p_start_date: string;
-          p_notes: string;
-          p_branches: string[];
-        };
-        Returns: string;
-      };
-      save_business_role: {
-        Args: {
-          p_tenant: string;
-          p_id: string | null;
-          p_name: string;
-          p_scope: string;
-          p_permissions: string[];
-        };
-        Returns: string;
-      };
-      assign_member_role: {
-        Args: {
-          p_tenant: string;
-          p_user: string;
-          p_role: string;
-          p_branches: string[];
-          p_branch_roles: Record<string, string>;
-          p_active: boolean;
-        };
-        Returns: undefined;
-      };
-      get_employee_salary: {
-        Args: { p_tenant: string; p_employee: string };
-        Returns: SalaryConfig | null;
-      };
-      salary_history: {
-        Args: { p_tenant: string; p_employee: string };
-        Returns: SalaryEvent[];
-      };
-      save_employee_salary: {
-        Args: {
-          p_tenant: string;
-          p_employee: string;
-          p_type: string;
-          p_amount: string;
-          p_percentage: string;
-          p_bonus_amount: string;
-          p_bonus_percentage: string;
-          p_bonus_basis: string;
-          p_currency: string;
-          p_reason: string;
-        };
-        Returns: undefined;
-      };
-      create_employee_invitation: {
-        Args: { p_tenant: string; p_employee: string; p_role: string };
-        Returns: string;
-      };
-      revoke_employee_invitation: {
-        Args: { p_tenant: string; p_employee: string };
-        Returns: undefined;
-      };
-      preview_employee_invitation: {
-        Args: { p_token: string };
-        Returns: InvitationPreview;
-      };
       accept_employee_invitation: {
         Args: { p_token: string };
         Returns: string;
       };
+      add_lead_note: {
+        Args: {
+          p_body: string;
+          p_kind?: string;
+          p_lead: string;
+          p_tenant: string;
+        };
+        Returns: string;
+      };
+      archive_customer: {
+        Args: { p_archive: boolean; p_customer: string; p_tenant: string };
+        Returns: undefined;
+      };
+      archive_employee: {
+        Args: { p_employee: string; p_tenant: string };
+        Returns: undefined;
+      };
+      archive_lead: {
+        Args: { p_archive: boolean; p_lead: string; p_tenant: string };
+        Returns: undefined;
+      };
+      assign_member_role: {
+        Args: {
+          p_active?: boolean;
+          p_branch_roles?: Json;
+          p_branches: string[];
+          p_role: string;
+          p_tenant: string;
+          p_user: string;
+        };
+        Returns: undefined;
+      };
+      cashbox_details: {
+        Args: {
+          p_audit_page?: number;
+          p_cashbox: string;
+          p_filters?: Json;
+          p_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      cashbox_directory: {
+        Args: { p_filters?: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
+      complete_lead_followup: {
+        Args: { p_followup: string; p_outcome: string; p_tenant: string };
+        Returns: undefined;
+      };
+      convert_lead: {
+        Args: {
+          p_confirm_duplicate?: boolean;
+          p_customer?: string;
+          p_lead: string;
+          p_stage?: string;
+          p_tenant: string;
+        };
+        Returns: string;
+      };
       create_business: {
         Args: {
-          p_name: string;
-          p_business_type?: string;
-          p_contact_email?: string;
-          p_phone?: string;
           p_address?: string;
           p_branch_name?: string;
+          p_business_type?: string;
+          p_contact_email?: string;
+          p_name: string;
+          p_phone?: string;
+        };
+        Returns: string;
+      };
+      create_employee_invitation: {
+        Args: { p_employee: string; p_role: string; p_tenant: string };
+        Returns: string;
+      };
+      customer_directory: {
+        Args: {
+          p_archived?: boolean;
+          p_branch?: string;
+          p_employee?: string;
+          p_page?: number;
+          p_search?: string;
+          p_sort?: string;
+          p_status?: string;
+          p_students?: boolean;
+          p_tag?: string;
+          p_tenant: string;
+        };
+        Returns: {
+          archived_at: string;
+          branch_ids: string[];
+          created_at: string;
+          email: string;
+          first_name: string;
+          id: string;
+          last_name: string;
+          phone: string;
+          responsible_employee_id: string;
+          responsible_name: string;
+          status_id: string;
+          status_name: string;
+          student_identifier: string;
+          tag_names: string[];
+          total_count: number;
+        }[];
+      };
+      customer_duplicate_candidates: {
+        Args: {
+          p_email?: string;
+          p_exclude?: string;
+          p_name?: string;
+          p_phone?: string;
+          p_tenant: string;
+        };
+        Returns: {
+          archived: boolean;
+          email: string;
+          full_name: string;
+          id: string;
+          match_reason: string;
+          phone: string;
+        }[];
+      };
+      customer_employee_choices: {
+        Args: { p_tenant: string };
+        Returns: {
+          full_name: string;
+          id: string;
+        }[];
+      };
+      get_employee_salary: {
+        Args: { p_employee: string; p_tenant: string };
+        Returns: Json;
+      };
+      lead_directory: {
+        Args: {
+          p_board?: boolean;
+          p_filters?: Json;
+          p_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      lead_duplicate_candidates: {
+        Args: {
+          p_email?: string;
+          p_exclude?: string;
+          p_phone?: string;
+          p_tenant: string;
+        };
+        Returns: {
+          full_name: string;
+          id: string;
+          phone: string;
+          status: string;
+        }[];
+      };
+      list_business_members: {
+        Args: { p_tenant: string };
+        Returns: {
+          branch_ids: string[];
+          email: string;
+          full_name: string;
+          is_active: boolean;
+          role: Database["public"]["Enums"]["app_role"];
+          user_id: string;
+        }[];
+      };
+      move_lead: {
+        Args: {
+          p_expected_stage: string;
+          p_lead: string;
+          p_notes?: string;
+          p_reason?: string;
+          p_stage: string;
+          p_tenant: string;
+        };
+        Returns: undefined;
+      };
+      permission_grants: {
+        Args: { p_tenant: string };
+        Returns: {
+          branch_id: string;
+          permission: string;
+        }[];
+      };
+      post_cashbox_entry: {
+        Args: {
+          p_amount: string;
+          p_cashbox: string;
+          p_kind: string;
+          p_reason: string;
+          p_request: string;
+          p_tenant: string;
+        };
+        Returns: string;
+      };
+      preview_employee_invitation: { Args: { p_token: string }; Returns: Json };
+      reorder_sales_stages: {
+        Args: { p_pipeline: string; p_stages: string[]; p_tenant: string };
+        Returns: undefined;
+      };
+      revoke_employee_invitation: {
+        Args: { p_employee: string; p_tenant: string };
+        Returns: undefined;
+      };
+      salary_history: {
+        Args: { p_employee: string; p_tenant: string };
+        Returns: {
+          changed_by: string;
+          created_at: string;
+          employee_id: string;
+          id: string;
+          new_settings: NonNullable<Json>;
+          previous_settings: Json | null;
+          reason: string;
+          tenant_id: string;
+        }[];
+        SetofOptions: {
+          from: "*";
+          to: "employee_salary_history";
+          isOneToOne: false;
+          isSetofReturn: true;
+        };
+      };
+      sales_analytics: {
+        Args: { p_filters?: Json; p_tenant: string };
+        Returns: Json;
+      };
+      sales_employee_choices: {
+        Args: { p_branch: string; p_tenant: string };
+        Returns: {
+          full_name: string;
+          id: string;
+        }[];
+      };
+      sales_followup_directory: {
+        Args: { p_filters?: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
+      save_business_role: {
+        Args: {
+          p_id: string;
+          p_name: string;
+          p_permissions: string[];
+          p_scope: string;
+          p_tenant: string;
+        };
+        Returns: string;
+      };
+      save_cashbox: {
+        Args: {
+          p_data: Json;
+          p_id: string;
+          p_request: string;
+          p_tenant: string;
+        };
+        Returns: string;
+      };
+      save_customer: {
+        Args: {
+          p_branches: string[];
+          p_fields?: Json;
+          p_id: string;
+          p_profile: Json;
+          p_student?: Json;
+          p_tags?: string[];
+          p_tenant: string;
+        };
+        Returns: string;
+      };
+      save_customer_note: {
+        Args: {
+          p_body: string;
+          p_customer: string;
+          p_id: string;
+          p_kind?: string;
+          p_tenant: string;
+        };
+        Returns: string;
+      };
+      save_customer_setting: {
+        Args: {
+          p_active?: boolean;
+          p_id: string;
+          p_kind: string;
+          p_name: string;
+          p_tenant: string;
+          p_type?: string;
+        };
+        Returns: string;
+      };
+      save_employee: {
+        Args: {
+          p_branches: string[];
+          p_email: string;
+          p_full_name: string;
+          p_id: string;
+          p_job_title: string;
+          p_notes: string;
+          p_phone: string;
+          p_start_date: string;
+          p_status: string;
+          p_tenant: string;
+        };
+        Returns: string;
+      };
+      save_employee_salary: {
+        Args: {
+          p_amount: string;
+          p_bonus_amount: string;
+          p_bonus_basis: string;
+          p_bonus_percentage: string;
+          p_currency: string;
+          p_employee: string;
+          p_percentage: string;
+          p_reason: string;
+          p_tenant: string;
+          p_type: string;
+        };
+        Returns: undefined;
+      };
+      save_lead: {
+        Args: { p_data: Json; p_id: string; p_tenant: string };
+        Returns: string;
+      };
+      save_lead_followup: {
+        Args: { p_data: Json; p_id: string; p_lead: string; p_tenant: string };
+        Returns: string;
+      };
+      save_sales_setting: {
+        Args: { p_data: Json; p_id: string; p_kind: string; p_tenant: string };
+        Returns: string;
+      };
+      save_student_guardian: {
+        Args: {
+          p_customer: string;
+          p_email: string;
+          p_emergency?: boolean;
+          p_full_name: string;
+          p_guardian: string;
+          p_phone: string;
+          p_relationship: string;
+          p_tenant: string;
         };
         Returns: string;
       };
       set_business_member: {
         Args: {
-          p_tenant: string;
-          p_email: string;
-          p_role: AppRole;
-          p_branches?: string[];
           p_active?: boolean;
+          p_branches?: string[];
+          p_email: string;
+          p_role: Database["public"]["Enums"]["app_role"];
+          p_tenant: string;
         };
         Returns: undefined;
       };
-      list_business_members: {
-        Args: { p_tenant: string };
-        Returns: {
-          user_id: string;
-          full_name: string;
-          email: string;
-          role: AppRole;
-          is_active: boolean;
-          branch_ids: string[];
-        }[];
+      unlink_student_guardian: {
+        Args: { p_customer: string; p_guardian: string; p_tenant: string };
+        Returns: undefined;
       };
     };
-    Enums: { app_role: AppRole };
-    CompositeTypes: { [_ in never]: never };
+    Enums: {
+      app_role:
+        "owner" | "admin" | "manager" | "teacher" | "staff" | "employee";
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
   };
 };
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<
+  keyof Database,
+  "public"
+>];
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R;
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
+      }
+      ? R
+      : never
+    : never;
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I;
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I;
+      }
+      ? I
+      : never
+    : never;
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never) = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U;
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U;
+      }
+      ? U
+      : never
+    : never;
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never) = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never;
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never) = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never;
+
+export const Constants = {
+  public: {
+    Enums: {
+      app_role: ["owner", "admin", "manager", "teacher", "staff", "employee"],
+    },
+  },
+} as const;

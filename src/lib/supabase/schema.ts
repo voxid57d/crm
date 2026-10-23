@@ -3,17 +3,32 @@ import type { Database as GeneratedDatabase } from "./database.types";
 // PostgreSQL accepts NULL function arguments. Type generation does not always
 // express that for UUID inputs used to distinguish create from update.
 type Functions = GeneratedDatabase["public"]["Functions"];
-type NullableId<K extends "save_employee" | "save_business_role"> = Omit<
-  Functions[K],
-  "Args"
-> & {
+type IdFunction =
+  | "save_employee"
+  | "save_business_role"
+  | "save_customer"
+  | "save_customer_note"
+  | "save_customer_setting"
+  | "save_lead"
+  | "save_lead_followup"
+  | "save_sales_setting"
+  | "save_cashbox";
+type NullableId<K extends IdFunction> = Omit<Functions[K], "Args"> & {
   Args: Omit<Functions[K]["Args"], "p_id"> & { p_id: string | null };
 };
 export type Database = Omit<GeneratedDatabase, "public"> & {
   public: Omit<GeneratedDatabase["public"], "Functions"> & {
-    Functions: Omit<Functions, "save_employee" | "save_business_role"> & {
-      save_employee: NullableId<"save_employee">;
-      save_business_role: NullableId<"save_business_role">;
+    Functions: Omit<Functions, IdFunction | "save_student_guardian"> & {
+      [K in IdFunction]: NullableId<K>;
+    } & {
+      save_student_guardian: Omit<
+        Functions["save_student_guardian"],
+        "Args"
+      > & {
+        Args: Omit<Functions["save_student_guardian"]["Args"], "p_guardian"> & {
+          p_guardian: string | null;
+        };
+      };
     };
   };
 };

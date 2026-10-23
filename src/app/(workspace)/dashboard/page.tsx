@@ -143,13 +143,18 @@ export default async function DashboardPage() {
           Build your workspace, step by step
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          CRM and learning modules remain planned.
+          Customer and student profiles are available. Course, schedule, and
+          attendance workflows will follow.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {modules.slice(0, 4).map((entry) => (
             <Link
               key={entry.slug}
-              href={"/modules/" + entry.slug}
+              href={
+                entry.slug === "students"
+                  ? "/students"
+                  : "/modules/" + entry.slug
+              }
               className="rounded-xl border bg-white p-5 hover:border-primary/40"
             >
               <h3 className="text-sm font-semibold">{entry.title}</h3>
@@ -157,7 +162,7 @@ export default async function DashboardPage() {
                 {entry.description}
               </p>
               <span className="mt-4 block text-xs text-muted-foreground">
-                Not implemented
+                {entry.slug === "students" ? "Open students" : "Planned module"}
               </span>
             </Link>
           ))}

@@ -19,15 +19,27 @@ export function ActionForm({
   submit,
   children,
   className = "space-y-4",
+  confirmation,
 }: {
   action: FormAction;
   submit: string;
   children?: React.ReactNode;
   className?: string;
+  confirmation?: string;
 }) {
   const [state, formAction] = useActionState(action, {});
   return (
-    <form action={formAction} className={className}>
+    <form
+      action={formAction}
+      className={className}
+      onSubmit={
+        confirmation
+          ? (event) => {
+              if (!window.confirm(confirmation)) event.preventDefault();
+            }
+          : undefined
+      }
+    >
       {state.error && (
         <p
           role="alert"
