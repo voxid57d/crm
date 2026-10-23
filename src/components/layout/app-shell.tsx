@@ -48,7 +48,9 @@ export function AppShell({
                       : pathname.startsWith("/sales") ||
                           pathname.startsWith("/leads")
                         ? "Sales CRM"
-                        : "Modules";
+                        : pathname.startsWith("/finance")
+                          ? "Finance"
+                          : "Modules";
   return (
     <div className="min-h-screen">
       <a

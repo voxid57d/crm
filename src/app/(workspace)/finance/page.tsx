@@ -29,17 +29,40 @@ export default async function FinancePage() {
           </Button>
         </section>
       ) : (
-        <p role="alert" className="rounded-xl border bg-white p-6">
-          Your role has no financial access. Ask your business owner to review
-          your permissions.
-        </p>
+        !workspace.permissions.has("invoices.view") && (
+          <p role="alert" className="rounded-xl border bg-white p-6">
+            Your role has no financial access. Ask your business owner to review
+            your permissions.
+          </p>
+        )
+      )}
+      {workspace.permissions.has("invoices.view") && (
+        <section className="space-y-4 rounded-xl border bg-white p-6">
+          <h2 className="text-xl font-semibold">
+            Invoices and customer receivables
+          </h2>
+          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+            Create and review drafts, issue numbered invoices and track
+            outstanding debt. Issued documents retain their original details;
+            authorized voids preserve the history.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Button asChild>
+              <Link href="/finance/invoices">Open invoices</Link>
+            </Button>
+            {workspace.permissions.has("debts.view") && (
+              <Button asChild variant="outline">
+                <Link href="/finance/debts">View receivables</Link>
+              </Button>
+            )}
+          </div>
+        </section>
       )}
       <section className="space-y-2 rounded-xl border border-dashed p-6">
         <h2 className="font-semibold">Coming in the next increments</h2>
         <p className="text-sm text-muted-foreground">
-          Invoices and receivables, followed by payments and allocations, then
-          expenses, transfers and refunds, and finally financial dashboards and
-          reports.
+          Payments and allocations, then expenses, transfers and refunds, and
+          finally financial dashboards and reports.
         </p>
       </section>
     </div>

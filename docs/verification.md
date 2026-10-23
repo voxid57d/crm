@@ -1,4 +1,4 @@
-﻿# Verification record — 23 October 2026 (through Step 6A)
+﻿# Verification record — 23 October 2026 (through Step 6B)
 
 ## Step 5 baseline and environment (historical)
 
@@ -74,3 +74,32 @@ Browser visual/responsive/mobile/keyboard and native confirmation-dialog interac
 Only UZS and database-time opening/adjustment postings exist. Negative balances are blocked, opening is first-only, branch/currency are immutable, and boxes cannot be deleted. History/audit page sizes are 20; recorder selection caps at 200. Invoices, receivables, allocations/credit, payments, expenses, transfers, refunds, linked reversals, financial dashboard aggregates and exports are **not implemented or claimed tested**. No statutory accounting claim is made. Step 6B requires a separate next instruction.
 
 Formatting and Git whitespace checks passed. A local checkpoint combines the previously uncommitted customer/student and sales increments with Step 6A; no remote push or deployment was requested for this increment.
+
+## Step 6B verification
+
+Before implementation, the clean Git checkpoint, sixteen existing migrations, exact cash ledger, audit/RLS/permission engine, customer/student/sales features and local services were inspected. All 104 baseline portable tests passed. Docker/Supabase and the existing app on 127.0.0.1:3000 were healthy for core services. No invoice/receivable tables existed. Five new additive migrations (`20261023001200` through `20261023001600`) were applied without reset, record deletion, deployment, hosted access or new dependencies. Database types were generated against the final local schema. Existing cashbox/audit rows are covered by a populated-upgrade test.
+
+| Check                           | Result                                                                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Final `npm run check`           | Passed: ESLint, strict TypeScript, 121 portable tests and optimized production build                                     |
+| Native `npm run db:test`        | Passed: 101 pgTAP assertions across seven suites, including 23 invoice assertions; repeated after the final query change |
+| Full `npm run test:integration` | Passed: all 37 tests across five real local Auth/API/rendered-form suites                                                |
+| Final invoice live suite        | Passed all 7 tests again after the document-scoped query improvement                                                     |
+| HTTP smoke                      | Four public pages, all 50 protected routes and callback/invitation/platform boundaries passed                            |
+| Database lint                   | No new invoice warnings. Existing `public.save_employee` unused-variable `m` warning remains                             |
+
+Portable invoice coverage verifies decimal quantities/line rounding/header and line discounts, zero/negative/precision/overflow/numeric-JSON rejection, maximum exact amounts, no draft debt, create/edit retries and stale versions, active customer/branch checks, future issue dates, atomic numbering/issuance, immutable issued contents/snapshots, reasoned full void offsets, linked replacements, retained discard history, and rollback of number/status/receivable/audit after injected failure. Role tests cover assigned Managers, read-only Cashiers, Teacher/Employee/foreign/subjectless denial, shared-customer all-branch CRM eligibility, separately scoped financial documents, employee deactivation, direct-DML denial and deferred integrity. Debt/aging/profile totals are compared to actual authoritative rows, including one shared customer billed in two branches without multiplication. Upgrade tests preserve exact existing cashbox balances and all prior audit output.
+
+Native PostgreSQL tests force deferred constraints to be checked for valid issue/void operations, independently exercise exact totals/receivable offsets, idempotency, client grants, foreign IDs, immutable lines/history and zero cash effect. Live tests sign up real local accounts with the public key, create actual customers/staff/cashboxes and submit rendered Next.js forms for create/edit/issue/void/discard. They verify persisted totals, overdue debt/customer profile/card/print HTML, frozen customer snapshots and replacement links. Concurrent duplicate issues create one charge; distinct simultaneous issues receive distinct numbers; concurrent edit versus issue yields one valid version winner and no inconsistent receivable. Cashbox balance remains unchanged. Cashier/foreign branches, forged tenant forms, raw monetary reads and inactive employees are denied. Earlier Auth/HR/customer/sales/cashbox live regressions remain passing.
+
+Initial development checks caught an ambiguous PL/pgSQL variable and nullable linked-customer TypeScript input; both were corrected before final verification. Native lint also prompted explicit JSON initialization/audit checking and correct STABLE volatility in an additive function migration. Final tests have no failures. Detail queries now pass the requested invoice ID into the internal data query before calculating totals, rather than calculating every invoice in the business.
+
+### Changed files and manual limits
+
+New files include `src/features/finance/invoice-{actions,queries,types}`, reusable invoice/debt/customer-finance components, `/finance/invoices/*`, `/finance/debts`, `/customers/[customer]/finance`, the standalone protected print route under `(documents)`, five migration files, native/portable/live invoice tests and a reusable local rendered-form test helper. Existing customer/converted-lead links, finance home/navigation/role help, smoke routes, generated schema types and documentation are updated. The [invoice guide](invoices.md) lists schema/permissions, calculations, lifecycle/locking contracts, manual steps and the exact 6C extension requirements.
+
+No extra installation or manual service setup is required on this configured machine. To restart, start Docker, run `npm run db:start`, `npm run db:migrate`, and `npm run dev`. Open Finance → Invoices; save quantity 1.5 × 100.10 less line discount 0.15 and invoice discount 10.00, expect total 140.00, issue to create debt, then void to offset it while preserving history. Verify the same cashbox balance throughout. See the guide for separate-profile branch/tenant tests and debt aging.
+
+Visual/mobile/keyboard form interactions, line add/remove behavior in a browser, native confirmation dialogs, actual browser printing/Save PDF and long-document print pagination remain **unverified**. Only protected print HTML/content is automated. Earlier recovery-link/confirmation redemption and Kanban interaction QA remain manual. Existing telemetry/vector restarts remain a nonblocking local service issue; core database/Auth/app tests pass. Live fixture records are isolated test businesses/accounts left locally for inspection; they are not application mock data.
+
+Only Step 6B is complete. Payments, allocation/credit, paid/partially-paid status, partial credit notes, refunds, expenses, transfers, global financial reports/exports and LMS billing are not implemented or claimed tested. Existing full invoice void must gain allocation-aware guards/unwinding before 6C payment records exist. A local checkpoint preserves this increment; no remote push or deployment is part of this work.

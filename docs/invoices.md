@@ -1,0 +1,78 @@
+# Invoices and receivables — Step 6B
+
+This increment adds invoice drafts, issue/void/discard operations, exact line items and discounts, customer receivables, debt aging, customer financial profiles and a browser print view. Payments, allocations, customer credit, partial settlement, refunds, expenses, transfers and financial exports remain later increments. There are no payment placeholders presented as real transactions or editable debt/balance fields.
+
+## Schema and lifecycle
+
+| Structure                         | Purpose                                                                                                                                                          |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `invoices`                        | One tenant, customer, branch and currency per document; dates, discount, notes, version and lifecycle metadata; preserved billed-party/business/branch snapshots |
+| `invoice_items`                   | Ordered description, exact quantity/unit price/line discount and generated exact line total                                                                      |
+| `invoice_number_counters`         | Tenant-scoped atomic issue sequence; no client access                                                                                                            |
+| `invoice_receivable_entries`      | Append-only issued charge and full void offset; each entry references its same-tenant/currency invoice and matching audit event                                  |
+| Existing `financial_audit_events` | Extended with an invoice scope and canonical request identity/payload; exactly one cashbox or invoice scope per event                                            |
+
+Migrations `20261023001200_invoice_receivables_schema.sql`, `20261023001300_invoice_lifecycle.sql`, `20261023001400_invoice_receivables_queries.sql`, `20261023001500_invoice_function_contracts.sql`, and `20261023001600_invoice_detail_scope.sql` add these structures, RLS, checked commands/queries, permission defaults and explicit function contracts. Existing cashbox/ledger/audit records are preserved. The final two migrations correct routine volatility/explicit audit checking and restrict detail-query calculations to the requested document instead of all business invoices; neither changes financial records. Database types are generated locally; the nullable create argument is refined in `schema.ts`.
+
+Drafts have no invoice number and no receivable. They may be edited with `invoices.create`, including changing customer/branch only after checking both old and new invoice scopes and the new customer's CRM access. Discarding is a reasoned soft state transition; the document/items/audit remain. Issued and discarded records cannot return to draft.
+
+Issuing verifies an active authorized customer in the active invoice branch, positive total, valid dates and expected draft version. It refreshes issuer, branch and billed-contact snapshots, atomically assigns `INV-000001` onward **within the business**, and appends exactly one positive receivable. Numbers are assigned only at issue; voids never reuse them. Failed issuance rolls back the number increment, document state, receivable and audit together. Concurrent issue requests cannot produce duplicate numbers or duplicate charges.
+
+Issued financial content/items/snapshots are immutable even after the customer/business name changes or the contact is archived. Lifecycle state can only proceed from issued to voided. An authorized void requires a reason, retains the original number/content/amount, and appends the exact opposite receivable plus audit. It does not refund or otherwise move cash. Partial credit notes/corrections are not supported in 6B. To correct a bill, void it and create a linked replacement draft for the same tenant/customer/branch; review and issue it separately. An archived customer must be restored before creating/issuing a replacement, but history and an authorized original void remain available.
+
+Only `draft`, `issued`, `voided`, and `discarded` are stored. `overdue` is derived for an issued positive receivable whose due date is before today's date in the business timezone. Due today is not overdue. Paid/partially-paid states will be derived after actual payment allocation records exist in 6C; this increment has no UI or RPC that pretends to mark invoices paid.
+
+## Exact arithmetic and integrity
+
+Monetary inputs are decimal strings, with two places and at most 16 integer digits, consistent with the UZS cash ledger. Quantities are positive exact NUMERIC with up to six integer and four fractional digits. Unit prices/discounts can be zero; negative amounts, scientific notation, numeric JSON inputs, excess precision and invalid discounts are rejected. A zero-total draft is permitted for review, but cannot be issued.
+
+For each line, PostgreSQL computes `round(quantity * unit_price, 2) - line_discount`. Positive half-cent ties round upward. Invoice subtotal is the sum of these line totals; invoice total subtracts the header discount. Discounts are fixed UZS amounts, not percentages; a line/header discount cannot exceed its applicable amount. Each line's gross and each final invoice total must fit the monetary movement magnitude. NUMERIC columns use explicit precision/magnitude checks rather than typmod rounding on unvalidated input. All calculations/comparisons remain in PostgreSQL; all money and quantities leave RPCs as strings. The browser edits strings, never computes money with floating point, and reviews server-calculated totals after saving.
+
+Outstanding debt is the authoritative sum of append-only receivable entries. A draft/discarded invoice has no such entries; an issued invoice has one exact charge, and a voided invoice has the original plus matching offset. Deferred triggers on headers, item mutations and new receivable entries enforce complete documents and state/amount/audit consistency. Immutable triggers block changing issued items/headers and receivable/audit UPDATE/DELETE; invoices cannot be deleted. No standalone editable invoice/customer debt field exists. Invoice operations never touch `financial_ledger_entries` or cashbox balances.
+
+Commands use UUID request keys, canonical payload/actor checks and the shared immutable audit stream for idempotency. An exact retry returns the same document even if a later valid command changed its state. Reusing a request key with different data, actor, operation or expected version fails. Edit/issue/void/discard compare the expected version; simultaneous commands cannot silently overwrite one another. A request-key lock followed by tenant → customer (when required) → invoice locking matches existing CRM writes. A customer row lock serializes issue with archival; tenant locking serializes issue with customer branch edits and business role changes. A branch share lock serializes issuance with branch deactivation. Creating a new form after refresh starts a new request; keys do not detect two independently entered bills for the same real-world service.
+
+## Authorization
+
+All operations reuse `private.has_permission`; no separate role engine or service-role client exists. All four new tables have RLS and no direct client read/write grants, avoiding raw numeric JSON and mutation bypasses. Checked query RPCs explicitly scope each document; financial audit RLS supports the current invoice scope as well as cashboxes.
+
+| Default role                       | Invoice/receivable access                                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Owner / Admin                      | View/create/issue/void/debts across their own business; detailed audit through existing `finance.audit.view` |
+| Branch Manager                     | View/create/issue/debts in explicitly assigned branches; no void or detailed audit by default                |
+| Cashier                            | View invoices/debts in assigned branches; no draft/issue/void by default                                     |
+| Teacher / Employee / Sales Manager | No invoice/debt access by default                                                                            |
+| Custom role                        | Explicit grants checked independently in each branch                                                         |
+
+`invoices.view` is required along with an operation grant. `invoices.create` includes editing/discarding drafts. `invoices.issue`, `invoices.void`, and `debts.view` are separate permissions. Debt queries require invoice view plus debt view in the **same branch**; grants from different branches cannot be combined. Detailed before/after audit snapshots additionally require `finance.audit.view`; normal invoice viewers can see lifecycle actor/time/reason.
+
+Creating/editing/issuing also requires existing `customers.view` authorization for the selected contact and association with the invoice branch. Shared customer contacts keep the established all-assigned-branches CRM rule. Historical financial-document viewing is governed by the invoice's own branch and deliberately includes its billed-party snapshot; a cashier can read an authorized bill without obtaining unrelated CRM notes or a shared customer's full profile. An invoice's branch is independent from later customer-branch changes. Customer-profile links appear only with actual customer view; the dedicated financial profile additionally requires CRM view and aggregates only financial branches the caller can access. Archival/deactivation does not erase history. Inactive/archived linked employees and suspended business memberships lose access immediately.
+
+## Queries, dates and UI
+
+- `/finance/invoices`: 20-record pages, literal customer/number search, branch/customer/status filters, newest/due/total sorting. The selected permitted branch is the default; explicitly choosing all includes all authorized branches.
+- `/finance/invoices/new` and `/[id]/edit`: real customer search (first 20 matches plus verified current selection), branch choice, add/remove up to 100 lines, exact decimal inputs and saved-total review. Changing search/scope reloads the form; save any edits first.
+- `/finance/invoices/[id]`: preserved document, total/outstanding, lifecycle confirmations, receivable history, paginated lifecycle/audit snapshots and linked originals/replacements.
+- `/finance/invoices/[id]/print`: authenticated standalone printable document; browser **Print / Save PDF** only. HTML/content/authorization are tested. Browser print pagination and actual PDF output remain manual; no server PDF library was added.
+- `/finance/debts`: exact authorized outstanding/overdue totals, aging and paginated debtor groups with invoice/profile links.
+- `/customers/[customer]/finance`: issued charges before voids, voided charges, outstanding/overdue, earliest unpaid due date, aging and authorized invoice pages. The main customer profile shows a finance card only for permitted users.
+
+Converted sales leads link to creating a customer invoice when permitted. Conversion never creates an invoice automatically. Student profiles use the same customer finance identity; no duplicate student billing/customer tables or LMS billing automation exist.
+
+Issue/due dates are DATE values interpreted against the business IANA timezone, not browser timezone. Due must be on/after issue. Drafts may have a future planned issue date; issuance cannot occur before it. Backdated manual bills are allowed. Debt aging uses calendar-day differences: not due/due today,1–7,8–30,31–60,over60 days. The earliest due date includes overdue unpaid invoices. Timestamps retain UTC and display in the business timezone. Search/branch/customer filters define the visible summary cohort; each invoice appears once regardless of customer branch count. No foreign-currency totals are combined. Payment history/credit and general finance dashboard/reports/exports remain deferred.
+
+## Local walkthrough
+
+The current local stack/app configuration is sufficient. If restarting: start Docker Desktop, run `npm run db:start`, `npm run db:migrate`, then `npm run dev` from the project. Keep the existing loopback `.env.local`. No new package, hosted project or external service configuration is required.
+
+1. Sign in at http://127.0.0.1:3000, select a business/branch, and create an active customer associated with that branch if needed.
+2. Open **Finance → Invoices → Create invoice**. Select the customer; add quantity **1.5**, unit price **100.10**, line discount **0.15**, and invoice discount **10.00**. Save. Expect subtotal **150.00 UZS**, total **140.00 UZS**, draft state, no number or receivable. Add/remove lines and edit/save the draft; reopen an old tab to check stale-version rejection.
+3. Review and confirm **Issue invoice**. Expect the next business invoice number, unchanged total and **140.00 UZS** outstanding. Inspect customer finances and Receivables. For overdue testing, use an issue/due date eight days in the past; the debt belongs in8–30 days. Due today is not overdue.
+4. Change/archive the customer and inspect the invoice: the original billed details remain. Confirm **Void invoice** with a reason; outstanding becomes zero while the original 140.00 amount, number, charge and negative offset remain visible. Restore an archived contact before creating a linked replacement draft.
+5. Inspect the print page and manually test browser Save PDF, multipage line items and mobile/keyboard/confirmation behavior. Try zero/negative quantities, excess precision, over-discounts and a zero-total issue; none may create an invalid charge.
+6. With a shared customer, issue one invoice in each of two branches. Confirm all-branch totals count each once and branch filters return only that branch's invoices. In separate profiles, test an assigned Manager, Cashier, Employee and another business Owner. Paste foreign invoice/customer URLs and change request IDs/scopes; no forbidden records or actions should become available.
+7. Keep a cashbox with a known balance and verify draft/issue/void operations never change it. Deactivate a linked employee and confirm the current session loses financial access. Check invoice audit actors/reasons and retained history.
+
+Run `npm run check`, `npm run db:test`, `npm run db:lint`, `npm run format:check`, `npm run test:smoke`, and (local app running) `npm run test:integration`. Invoice-only commands: `node --test tests/invoices*.test.mjs` and `node --env-file=.env.local --test tests/integration/invoices.test.mjs`. Portable tests apply the actual migrations in isolated embedded PostgreSQL; native tests roll back fixtures; live suites create real local Auth accounts/businesses and leave isolated records for inspection. See [verification](verification.md) for actual results.
+
+Next increment is **6C: real payments, allocations and credits**. It must link payment cash movements to their immutable envelope, add allocation-linked receivable effects, derive paid/partially-paid status, prevent over-allocation under concurrency and preserve invoice/ledger consistency. Voiding will need to reject or explicitly unwind allocated invoices atomically before offsets; the current 6B full-void invariant must not simply be reused after allocations exist. No payment workflow or claim of statutory/tax-compliant invoicing is made here.

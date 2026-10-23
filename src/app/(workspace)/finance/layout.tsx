@@ -14,13 +14,25 @@ export default function FinanceLayout({
           className="text-primary underline underline-offset-4"
           href="/finance"
         >
-          Financial foundation
+          Finance home
         </Link>
         <Link
           className="text-primary underline underline-offset-4"
           href="/finance/cashboxes"
         >
           Cashboxes
+        </Link>
+        <Link
+          className="text-primary underline underline-offset-4"
+          href="/finance/invoices"
+        >
+          Invoices
+        </Link>
+        <Link
+          className="text-primary underline underline-offset-4"
+          href="/finance/debts"
+        >
+          Receivables
         </Link>
       </nav>
       {children}

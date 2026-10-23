@@ -1,6 +1,6 @@
 # Financial foundation — Step 6A
 
-This increment implements cashboxes and the operational cash ledger only. Invoices/receivables (6B), payments/allocations/credit (6C), expenses/transfers/refunds/reversals (6D), and financial dashboards/reports/exports (6E) are deliberately deferred. Opening balances and reasoned adjustments are the only posting workflows currently exposed. Adjustments are not payment, expense or refund records.
+This document records the Step 6A cashbox/operational cash-ledger contract. [Step 6B invoices and receivables](invoices.md) now extend it with a separate receivable ledger and shared audit stream. Payments/allocations/credit (6C), expenses/transfers/refunds/reversals (6D), and financial dashboards/reports/exports (6E) remain deferred. Opening balances and reasoned adjustments are the only **cash posting** workflows exposed. Invoice issue/void changes receivables, never cash. Adjustments are not payment, expense or refund records.
 
 ## Data and exact money
 

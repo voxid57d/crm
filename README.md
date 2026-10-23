@@ -1,6 +1,6 @@
 ﻿# Forma — local CRM/LMS platform
 
-Next.js/TypeScript, Tailwind/shadcn, and local Supabase. Implemented domains: Auth, business/branch workspaces, employees, tenant roles, invitations, confidential salary configuration, customers/students, Sales CRM, and Step 6A cashboxes/ledger foundation. Invoices, payments, expenses/transfers/refunds, financial reports, LMS enrollment/progress, external messaging integrations, and payroll calculation remain unimplemented.
+Next.js/TypeScript, Tailwind/shadcn, and local Supabase. Implemented domains: Auth, business/branch workspaces, employees, tenant roles, invitations, confidential salary configuration, customers/students, Sales CRM, cashboxes/ledger, and Step 6B invoices/receivables. Payments, expenses/transfers/refunds, financial reports/exports, LMS enrollment/progress, external messaging integrations, and payroll calculation remain unimplemented.
 
 Local Docker/Supabase is configured. Native database tests and real local Auth/API/server-form tests cover the preceding modules and sales forms, follow-ups, loss/reopening, and transactional customer conversion. Browser dragging/rollback visuals, mobile/keyboard QA, native confirmation dialogs, and recovery-email link redemption remain manual. See [verification](docs/verification.md) for exact results and limits.
 
@@ -101,7 +101,7 @@ Create future migrations with `npx supabase migration new descriptive_name`; app
 | `npm run test:integration`                 | Real local Auth/PostgREST/authenticated HTML; requires configured stack and app |
 | `npm run db:lint` / `db:test` / `db:types` | Native database lint / pgTAP / generated types                                  |
 
-Portable tests apply real migration SQL in embedded PostgreSQL with a minimal Auth contract. PGlite is an isolated test harness, never the app database. Native pgTAP and live integration independently exercise real local Supabase. Full live runs create thirteen real local test accounts plus isolated business/employee/salary/customer/guardian/sales/finance records and leave them for inspection; use a development database. Customer, sales and finance suites submit rendered Next.js forms over HTTP with real Auth cookies; they do not automate browser rendering or client-side controls.
+Portable tests apply real migration SQL in embedded PostgreSQL with a minimal Auth contract. PGlite is an isolated test harness, never the app database. Native pgTAP and live integration independently exercise real local Supabase. Full live runs create sixteen real local test accounts plus isolated business/employee/salary/customer/guardian/sales/finance/invoice records and leave them for inspection; use a development database. Customer, sales, cashbox and invoice suites submit rendered Next.js forms over HTTP with real Auth cookies; they do not automate browser rendering or client-side controls.
 
 ## Manual feature walkthrough after local setup
 
@@ -190,7 +190,7 @@ Reports use **non-archived leads created in the selected inclusive business-loca
 7. Compare Sales Dashboard/Reports with database records using the documented creation cohort. Use separate browser profiles for Owner, branch sales staff and view-only staff; test branch/lead/tenant IDs through real requests as well as hidden controls.
 8. Complete manual pointer dragging, rollback visuals, mobile overflow, keyboard/focus, confirmation dialogs and timezone/DST edge QA. These browser interactions have not been automated here.
 
-Reproduce checks with `npm run check`, `npm run db:test`, `npm run test:smoke`, and (with local app running) `npm run test:integration`. `typecheck` runs `next typegen` before TypeScript, preventing stale route/layout definitions after adding routes. Full live integration now creates thirteen real local Auth accounts plus isolated fixture businesses/records and leaves them for inspection. No external messaging, automated reminders, deployment, payment or LMS enrollment is configured. The next planned increment is Step 6B invoices and receivables, after the remaining browser QA.
+Reproduce checks with `npm run check`, `npm run db:test`, `npm run test:smoke`, and (with local app running) `npm run test:integration`. `typecheck` runs `next typegen` before TypeScript, preventing stale route/layout definitions after adding routes. Full live integration creates sixteen real local Auth accounts plus isolated fixture businesses/records and leaves them for inspection. No external messaging, automated reminders, deployment, payment or LMS enrollment is configured. The current finance increment and remaining browser QA are described below.
 
 ## Cashboxes and ledger foundation (Step 6A)
 
@@ -207,4 +207,18 @@ Three additive migrations (`20261023000900`–`20261023001100`) add the currency
 
 Try an opening of **100.10 UZS** followed by **-0.10 UZS**: expect **100.00 UZS** and both history entries. Try zero, three decimal places and an adjustment below zero; nothing should post. Deactivate/reactivate, check retained history, then test another business/branch account. The detailed [finance architecture and walkthrough](docs/finance.md) covers each permission, constraint, manual test and future extension.
 
-Only Step 6A is implemented. Invoices/debts (6B), payments/allocations (6C), expenses/transfers/refunds/reversals (6D), and dashboards/reports/exports (6E) await separate instructions. Visual/mobile/keyboard/confirmation-dialog browser QA remains manual. This is an operational ledger, not statutory accounting.
+The cashbox contract above remains in use. Step 6B invoices/receivables are now implemented below. Payments/allocations (6C), expenses/transfers/refunds/reversals (6D), and dashboards/reports/exports (6E) await separate instructions. Visual/mobile/keyboard/confirmation-dialog browser QA remains manual. This is an operational ledger, not statutory accounting.
+
+## Invoices and customer receivables (Step 6B)
+
+Open **Finance → Invoices** at http://127.0.0.1:3000/finance/invoices. Create/edit drafts with real authorized customers and up to 100 exact line items. Save and review totals, then confirm issue to allocate the next business invoice number and create its receivable. Issued documents are immutable. Authorized voids retain the original and append the full offset; a linked replacement draft can be created for the same customer/branch. Draft discard preserves history without posting debt.
+
+For a quick check, use quantity **1.5**, unit price **100.10**, line discount **0.15**, and invoice discount **10.00**. Expect subtotal **150.00 UZS**, total **140.00 UZS**, and no draft debt. Issue it: outstanding becomes **140.00 UZS**. Void with a reason: outstanding becomes **0.00 UZS**, while the original amount/number and both receivable entries remain. Cashbox balances must not change.
+
+**Finance → Receivables** provides authorized debtor search, branch scope, exact outstanding/overdue sums and five aging buckets. Customer profiles link to financial summaries and invoice history. Multi-branch customers reuse one identity; every invoice owns one branch and is counted once. Converted sales leads can link to invoice creation, without automatic billing.
+
+New permissions are `invoices.view`, `invoices.create` (also draft edit/discard), `invoices.issue`, `invoices.void`, and `debts.view`. Owner/Admin have full own-business access; Branch Managers view/create/issue/debts in assigned branches; Cashiers view invoices/debts; Teacher/Employee/Sales Manager have no access by default. Selecting customers requires existing CRM access, including all-assigned-branches checks for shared contacts. Detailed audit snapshots use existing `finance.audit.view`.
+
+Five additive migrations (`20261023001200`–`20261023001600`) introduce four RLS-protected invoice/receivable tables and extend the shared financial audit stream. Amounts/quantities travel as decimal strings; all monetary calculations use PostgreSQL NUMERIC. No editable debt column or cash posting is introduced. The authenticated print view supports browser Print / Save PDF; actual PDF rendering, print pagination and visual/mobile/keyboard/confirmation QA remain manual.
+
+See the [invoice architecture and full walkthrough](docs/invoices.md) and [verification results](docs/verification.md). The existing local environment needs no extra dependency/configuration. **Step 6C payments, allocations and credits awaits the next instruction.** No paid/partially-paid state, manual payment, refund, expense, transfer or automated course charge is implemented in this increment.

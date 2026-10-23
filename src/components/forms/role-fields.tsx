@@ -44,8 +44,11 @@ export function RoleFields({
         business-wide grants. Sales pipeline/source configuration requires
         business-wide sales grants. Cashbox management, balance adjustments and
         audit viewing have separate permissions; business-wide cashboxes require
-        business-wide grants. Payment, learning and general report permissions
-        reserve future capabilities.
+        business-wide grants. Invoice creation includes draft
+        editing/discarding; issuing, voiding and receivable viewing have
+        separate grants. Selecting customers also requires existing customer
+        access. Payment, learning and general report permissions reserve future
+        capabilities.
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         {Array.from(groups, ([group, items]) => (

@@ -1,0 +1,107 @@
+import type { Json } from "@/lib/supabase/database.types";
+export type InvoiceLine = {
+  id?: string;
+  position?: number;
+  description: string;
+  quantity: string;
+  unit_price: string;
+  discount_amount: string;
+  line_total?: string;
+};
+export type BillingContact = {
+  name: string;
+  phone: string;
+  email: string | null;
+  address: string | null;
+};
+export type Invoice = {
+  id: string;
+  tenant_id: string;
+  branch_id: string;
+  customer_id: string;
+  currency: string;
+  state: "draft" | "issued" | "voided" | "discarded";
+  invoice_number: string | null;
+  issue_date: string;
+  due_date: string;
+  discount_amount: string;
+  notes: string;
+  bill_to: BillingContact;
+  issuer: BillingContact;
+  branch_name: string;
+  replaces_invoice_id: string | null;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  version: number;
+  issued_at: string | null;
+  void_reason: string | null;
+  items: (InvoiceLine & { line_total: string })[];
+};
+export type InvoiceRow = {
+  id: string;
+  branch_id: string;
+  customer_id: string;
+  currency: string;
+  state: Invoice["state"];
+  status: string;
+  invoice_number: string | null;
+  issue_date: string;
+  due_date: string;
+  created_at: string;
+  version: number;
+  customer_name: string;
+  branch_name: string;
+  total: string;
+  outstanding: string;
+  days_overdue: number;
+};
+export type InvoiceDetail = {
+  invoice: Invoice;
+  total: string;
+  subtotal: string;
+  outstanding: string;
+  status: string;
+  audit_total: number;
+  history: {
+    id: string;
+    operation: string;
+    reason: string;
+    actor_name: string;
+    created_at: string;
+    before_data: Json;
+    after_data: Json;
+  }[];
+  receivables: {
+    id: string;
+    kind: string;
+    amount: string;
+    created_at: string;
+  }[];
+  customer_visible: boolean;
+  replacements: { id: string; invoice_number: string | null; state: string }[];
+};
+export type DebtSummary = {
+  currency: string;
+  issued_charges: string;
+  voided_charges: string;
+  outstanding: string;
+  overdue: string;
+  not_due: string;
+  days_1_7: string;
+  days_8_30: string;
+  days_31_60: string;
+  days_over_60: string;
+  next_due_date: string | null;
+  outstanding_invoices: number;
+};
+export type DebtRow = {
+  customer_id: string;
+  currency: string;
+  customer_name: string;
+  customer_visible: boolean;
+  outstanding: string;
+  overdue: string;
+  next_due_date: string;
+  invoice_count: number;
+};

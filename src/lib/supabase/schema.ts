@@ -18,9 +18,17 @@ type NullableId<K extends IdFunction> = Omit<Functions[K], "Args"> & {
 };
 export type Database = Omit<GeneratedDatabase, "public"> & {
   public: Omit<GeneratedDatabase["public"], "Functions"> & {
-    Functions: Omit<Functions, IdFunction | "save_student_guardian"> & {
+    Functions: Omit<
+      Functions,
+      IdFunction | "save_student_guardian" | "save_invoice_draft"
+    > & {
       [K in IdFunction]: NullableId<K>;
     } & {
+      save_invoice_draft: Omit<Functions["save_invoice_draft"], "Args"> & {
+        Args: Omit<Functions["save_invoice_draft"]["Args"], "p_invoice"> & {
+          p_invoice: string | null;
+        };
+      };
       save_student_guardian: Omit<
         Functions["save_student_guardian"],
         "Args"

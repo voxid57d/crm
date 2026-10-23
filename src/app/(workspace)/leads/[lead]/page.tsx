@@ -484,6 +484,16 @@ export default async function LeadProfile({
               Original source, employee, pipeline, and sales history are
               retained.
             </p>
+            {linkedCustomer.data &&
+              permission("invoices.view") &&
+              permission("invoices.create") && (
+                <Link
+                  className="block text-sm font-medium text-primary underline"
+                  href={`/finance/invoices/new?${new URLSearchParams({ customer: lead.customer_id, branch: lead.branch_id })}`}
+                >
+                  Create invoice for converted customer
+                </Link>
+              )}
             {linkedCustomer.data ? (
               <Link
                 href={`/customers/${lead.customer_id}`}

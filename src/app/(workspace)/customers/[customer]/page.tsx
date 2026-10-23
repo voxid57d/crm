@@ -9,6 +9,7 @@ import { Guardians } from "@/components/customers/guardians";
 import { ActivityItem } from "@/components/customers/activity";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CustomerFinanceCard } from "@/components/finance/customer-finance-card";
 
 export const metadata = { title: "Customer profile" };
 function NoteKind({ value = "note" }: { value?: string }) {
@@ -402,13 +403,23 @@ export default async function CustomerProfile({
         </div>
       </section>
       <div className="grid gap-5 md:grid-cols-2">
-        <section id="payments" className="rounded-xl border bg-white p-5">
-          <h2 className="font-semibold">Payments</h2>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Reserved for a future payments integration. No payment records are
-            available in this phase.
-          </p>
-        </section>
+        {(workspace.businessPermissions.has("invoices.view") &&
+          workspace.businessPermissions.has("debts.view")) ||
+        workspace.branches.some(
+          (b) =>
+            workspace.branchPermissions.get(b.id)?.has("invoices.view") &&
+            workspace.branchPermissions.get(b.id)?.has("debts.view"),
+        ) ? (
+          <CustomerFinanceCard customerId={id} />
+        ) : (
+          <section id="payments" className="rounded-xl border bg-white p-5">
+            <h2 className="font-semibold">Payments</h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Reserved for a future payments integration. No payment records are
+              available in this phase.
+            </p>
+          </section>
+        )}
         <section id="learning" className="rounded-xl border bg-white p-5">
           <h2 className="font-semibold">Courses & lessons</h2>
           <p className="mt-3 text-sm text-muted-foreground">

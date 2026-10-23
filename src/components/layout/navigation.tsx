@@ -53,6 +53,8 @@ const groups = [
         icon: CircleDollarSign,
       },
       { href: "/finance/cashboxes", label: "Cashboxes", icon: Building2 },
+      { href: "/finance/invoices", label: "Invoices", icon: CircleDollarSign },
+      { href: "/finance/debts", label: "Receivables", icon: BarChart3 },
     ],
   },
   {

@@ -884,11 +884,14 @@ export type Database = {
           actor_name: string;
           after_data: NonNullable<Json>;
           before_data: Json | null;
-          cashbox_id: string;
+          cashbox_id: string | null;
           created_at: string;
           id: string;
+          invoice_id: string | null;
           operation: string;
           reason: string;
+          request_key: string | null;
+          request_payload: Json | null;
           tenant_id: string;
           transaction_id: string | null;
         };
@@ -898,11 +901,14 @@ export type Database = {
           actor_name: string;
           after_data: NonNullable<Json>;
           before_data?: Json | null;
-          cashbox_id: string;
+          cashbox_id?: string | null;
           created_at?: string;
           id?: string;
+          invoice_id?: string | null;
           operation: string;
           reason?: string;
+          request_key?: string | null;
+          request_payload?: Json | null;
           tenant_id: string;
           transaction_id?: string | null;
         };
@@ -911,11 +917,14 @@ export type Database = {
           actor_name?: string;
           after_data?: NonNullable<Json>;
           before_data?: Json | null;
-          cashbox_id?: string;
+          cashbox_id?: string | null;
           created_at?: string;
           id?: string;
+          invoice_id?: string | null;
           operation?: string;
           reason?: string;
+          request_key?: string | null;
+          request_payload?: Json | null;
           tenant_id?: string;
           transaction_id?: string | null;
         };
@@ -925,6 +934,13 @@ export type Database = {
             columns: ["tenant_id", "cashbox_id"];
             isOneToOne: false;
             referencedRelation: "cashboxes";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "financial_audit_events_tenant_id_invoice_id_fkey";
+            columns: ["tenant_id", "invoice_id"];
+            isOneToOne: false;
+            referencedRelation: "invoices";
             referencedColumns: ["tenant_id", "id"];
           },
           {
@@ -1083,6 +1099,245 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "tenants";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      invoice_items: {
+        Row: {
+          description: string;
+          discount_amount: number;
+          id: string;
+          invoice_id: string;
+          line_total: number | null;
+          position: number;
+          quantity: number;
+          tenant_id: string;
+          unit_price: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          description: string;
+          discount_amount?: number;
+          id?: string;
+          invoice_id: string;
+          line_total?: never;
+          position: number;
+          quantity: number;
+          tenant_id: string;
+          unit_price: number;
+        };
+        Update: {
+          description?: string;
+          discount_amount?: number;
+          id?: string;
+          invoice_id?: string;
+          line_total?: never;
+          position?: number;
+          quantity?: number;
+          tenant_id?: string;
+          unit_price?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_tenant_id_invoice_id_fkey";
+            columns: ["tenant_id", "invoice_id"];
+            isOneToOne: false;
+            referencedRelation: "invoices";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      invoice_number_counters: {
+        Row: {
+          last_number: number;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          last_number: number;
+          tenant_id: string;
+        };
+        Update: {
+          last_number?: number;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoice_number_counters_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: true;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      invoice_receivable_entries: {
+        Row: {
+          amount: number;
+          audit_event_id: string;
+          created_at: string;
+          currency: string;
+          id: string;
+          invoice_id: string;
+          kind: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount: number;
+          audit_event_id: string;
+          created_at?: string;
+          currency: string;
+          id?: string;
+          invoice_id: string;
+          kind: string;
+          tenant_id: string;
+        };
+        Update: {
+          amount?: number;
+          audit_event_id?: string;
+          created_at?: string;
+          currency?: string;
+          id?: string;
+          invoice_id?: string;
+          kind?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoice_receivable_entries_tenant_id_audit_event_id_fkey";
+            columns: ["tenant_id", "audit_event_id"];
+            isOneToOne: false;
+            referencedRelation: "financial_audit_events";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "invoice_receivable_entries_tenant_id_invoice_id_currency_fkey";
+            columns: ["tenant_id", "invoice_id", "currency"];
+            isOneToOne: false;
+            referencedRelation: "invoices";
+            referencedColumns: ["tenant_id", "id", "currency"];
+          },
+        ];
+      };
+      invoices: {
+        Row: {
+          bill_to: NonNullable<Json>;
+          branch_id: string;
+          branch_name: string;
+          created_at: string;
+          created_by: string;
+          currency: string;
+          customer_id: string;
+          discarded_at: string | null;
+          discount_amount: number;
+          due_date: string;
+          id: string;
+          invoice_number: string | null;
+          issue_date: string;
+          issued_at: string | null;
+          issued_by: string | null;
+          issuer: NonNullable<Json>;
+          notes: string;
+          replaces_invoice_id: string | null;
+          state: string;
+          tenant_id: string;
+          updated_at: string;
+          version: number;
+          void_reason: string | null;
+          voided_at: string | null;
+          voided_by: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          bill_to: NonNullable<Json>;
+          branch_id: string;
+          branch_name: string;
+          created_at?: string;
+          created_by: string;
+          currency?: string;
+          customer_id: string;
+          discarded_at?: string | null;
+          discount_amount?: number;
+          due_date: string;
+          id?: string;
+          invoice_number?: string | null;
+          issue_date: string;
+          issued_at?: string | null;
+          issued_by?: string | null;
+          issuer: NonNullable<Json>;
+          notes?: string;
+          replaces_invoice_id?: string | null;
+          state?: string;
+          tenant_id: string;
+          updated_at?: string;
+          version?: number;
+          void_reason?: string | null;
+          voided_at?: string | null;
+          voided_by?: string | null;
+        };
+        Update: {
+          bill_to?: NonNullable<Json>;
+          branch_id?: string;
+          branch_name?: string;
+          created_at?: string;
+          created_by?: string;
+          currency?: string;
+          customer_id?: string;
+          discarded_at?: string | null;
+          discount_amount?: number;
+          due_date?: string;
+          id?: string;
+          invoice_number?: string | null;
+          issue_date?: string;
+          issued_at?: string | null;
+          issued_by?: string | null;
+          issuer?: NonNullable<Json>;
+          notes?: string;
+          replaces_invoice_id?: string | null;
+          state?: string;
+          tenant_id?: string;
+          updated_at?: string;
+          version?: number;
+          void_reason?: string | null;
+          voided_at?: string | null;
+          voided_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "invoices_currency_fkey";
+            columns: ["currency"];
+            isOneToOne: false;
+            referencedRelation: "finance_currencies";
+            referencedColumns: ["code"];
+          },
+          {
+            foreignKeyName: "invoices_tenant_id_branch_id_fkey";
+            columns: ["tenant_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "invoices_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "customers";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "invoices_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "invoices_tenant_id_replaces_invoice_id_fkey";
+            columns: ["tenant_id", "replaces_invoice_id"];
+            isOneToOne: false;
+            referencedRelation: "invoices";
+            referencedColumns: ["tenant_id", "id"];
           },
         ];
       };
@@ -1933,8 +2188,37 @@ export type Database = {
           id: string;
         }[];
       };
+      customer_financial_profile: {
+        Args: {
+          p_branch?: string;
+          p_customer: string;
+          p_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      debt_directory: {
+        Args: { p_filters?: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
       get_employee_salary: {
         Args: { p_employee: string; p_tenant: string };
+        Returns: Json;
+      };
+      invoice_customer_choices: {
+        Args: { p_branch: string; p_search?: string; p_tenant: string };
+        Returns: {
+          id: string;
+          name: string;
+          phone: string;
+        }[];
+      };
+      invoice_details: {
+        Args: { p_audit_page?: number; p_invoice: string; p_tenant: string };
+        Returns: Json;
+      };
+      invoice_directory: {
+        Args: { p_filters?: Json; p_page?: number; p_tenant: string };
         Returns: Json;
       };
       lead_directory: {
@@ -2125,6 +2409,17 @@ export type Database = {
         };
         Returns: undefined;
       };
+      save_invoice_draft: {
+        Args: {
+          p_data: Json;
+          p_invoice: string;
+          p_items: Json;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
       save_lead: {
         Args: { p_data: Json; p_id: string; p_tenant: string };
         Returns: string;
@@ -2159,6 +2454,17 @@ export type Database = {
           p_tenant: string;
         };
         Returns: undefined;
+      };
+      transition_invoice: {
+        Args: {
+          p_action: string;
+          p_invoice: string;
+          p_reason?: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
       };
       unlink_student_guardian: {
         Args: { p_customer: string; p_guardian: string; p_tenant: string };
