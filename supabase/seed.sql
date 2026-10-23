@@ -1,0 +1,2 @@
+-- Deliberately empty: no demo tenants, users, passwords, or fabricated metrics.
+-- Authenticated users and business onboarding will be added in the next phase.

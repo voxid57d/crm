@@ -1,0 +1,108 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  BarChart3,
+  BookOpen,
+  Building2,
+  CalendarDays,
+  CheckSquare2,
+  CircleDollarSign,
+  GraduationCap,
+  LayoutDashboard,
+  Settings2,
+  Users,
+  UserRoundPlus,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const groups = [
+  {
+    label: "WORKSPACE",
+    links: [
+      { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+      { href: "/businesses", label: "Your businesses", icon: Building2 },
+    ],
+  },
+  {
+    label: "LEARNING",
+    links: [
+      { href: "/modules/students", label: "Students", icon: GraduationCap },
+      { href: "/modules/courses", label: "Courses & groups", icon: BookOpen },
+      { href: "/modules/schedule", label: "Schedule", icon: CalendarDays },
+      { href: "/modules/attendance", label: "Attendance", icon: CheckSquare2 },
+    ],
+  },
+  {
+    label: "BUSINESS",
+    links: [
+      { href: "/modules/leads", label: "Leads", icon: UserRoundPlus },
+      { href: "/modules/finance", label: "Finance", icon: CircleDollarSign },
+      { href: "/team", label: "Team & access", icon: Users },
+      { href: "/employees", label: "Employees", icon: Users },
+      { href: "/roles", label: "Roles & permissions", icon: Settings2 },
+      { href: "/branches", label: "Branches", icon: Building2 },
+    ],
+  },
+];
+
+export function Navigation({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
+  return (
+    <nav aria-label="Main navigation" className="space-y-7">
+      {groups.map((group) => (
+        <div key={group.label}>
+          <p className="mb-2 px-3 text-[10px] font-semibold tracking-[0.16em] text-slate-400">
+            {group.label}
+          </p>
+          <div className="space-y-1">
+            {group.links.map(({ href, label, icon: Icon }) => (
+              <Link
+                onClick={onNavigate}
+                key={href}
+                href={href}
+                aria-current={pathname === href ? "page" : undefined}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white",
+                  pathname === href &&
+                    "bg-[#26493f] text-[#bcf2da] hover:bg-[#26493f]",
+                )}
+              >
+                <Icon size={17} strokeWidth={1.7} aria-hidden="true" />
+                {label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
+      <div className="border-t border-white/10 pt-4">
+        <Link
+          onClick={onNavigate}
+          href="/settings"
+          aria-current={pathname === "/settings" ? "page" : undefined}
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 hover:bg-white/5",
+            pathname === "/settings" && "bg-[#26493f] text-[#bcf2da]",
+          )}
+        >
+          <Settings2 size={17} aria-hidden="true" />
+          Settings
+        </Link>
+      </div>
+    </nav>
+  );
+}
+
+export function Brand() {
+  return (
+    <Link href="/dashboard" className="flex items-center gap-2.5 text-white">
+      <span className="flex size-9 items-center justify-center rounded-xl bg-[#b9ecd3] text-[#173d32]">
+        <BarChart3 size={22} aria-hidden="true" />
+      </span>
+      <span className="text-2xl font-semibold tracking-tight">
+        forma<span className="text-[#b9ecd3]">.</span>
+      </span>
+    </Link>
+  );
+}
