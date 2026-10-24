@@ -54,6 +54,7 @@ export function CustomerFields({
   branchIds,
   tagIds = [],
   values = [],
+  studentFirst = false,
 }: {
   options: Awaited<ReturnType<typeof customerOptions>>;
   customer?: Customer;
@@ -61,6 +62,7 @@ export function CustomerFields({
   branchIds: string[];
   tagIds?: string[];
   values?: { field_id: string; value: string }[];
+  studentFirst?: boolean;
 }) {
   const { workspace, statuses, tags, fields, employees } = options;
   const permission = customer ? "customers.update" : "customers.create";
@@ -128,7 +130,7 @@ export function CustomerFields({
           <option value="undisclosed">Prefer not to say</option>
         </SelectField>
         <SelectField
-          label="Customer status"
+          label={studentFirst ? "CRM status" : "Customer status"}
           name="status_id"
           defaultValue={
             customer?.status_id ?? statuses.find((s) => s.is_default)?.id
@@ -218,7 +220,7 @@ export function CustomerFields({
           )}
         </div>
       </fieldset>
-      <StudentFields student={student ?? null} />
+      <StudentFields student={student ?? null} requiredStudent={studentFirst} />
       {fields.some((f) => f.is_active) && (
         <fieldset className="rounded-xl border p-4">
           <legend className="px-1 text-sm font-medium">

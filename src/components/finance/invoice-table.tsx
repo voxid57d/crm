@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { formatMoney } from "@/features/finance/money.mjs";
 import type { InvoiceRow } from "@/features/finance/invoice-types";
-export function InvoiceTable({ rows }: { rows: InvoiceRow[] }) {
+export function InvoiceTable({
+  rows,
+  identityLabel = "Customer",
+}: {
+  rows: InvoiceRow[];
+  identityLabel?: string;
+}) {
   return (
     <div className="overflow-x-auto rounded-xl border bg-white">
       <table className="w-full text-left text-sm">
@@ -10,7 +16,7 @@ export function InvoiceTable({ rows }: { rows: InvoiceRow[] }) {
           <tr>
             {[
               "Invoice",
-              "Customer",
+              identityLabel,
               "Branch",
               "Status",
               "Due date",

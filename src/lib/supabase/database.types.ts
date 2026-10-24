@@ -2400,6 +2400,42 @@ export type Database = {
           },
         ];
       };
+      student_save_requests: {
+        Row: {
+          actor_id: string;
+          created_at: string;
+          customer_id: string;
+          request_id: string;
+          request_payload: NonNullable<Json>;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id: string;
+          created_at?: string;
+          customer_id: string;
+          request_id: string;
+          request_payload: NonNullable<Json>;
+          tenant_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          created_at?: string;
+          customer_id?: string;
+          request_id?: string;
+          request_payload?: NonNullable<Json>;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "student_save_requests_tenant_id_customer_id_fkey";
+            columns: ["tenant_id", "customer_id"];
+            isOneToOne: false;
+            referencedRelation: "student_profiles";
+            referencedColumns: ["tenant_id", "customer_id"];
+          },
+        ];
+      };
       tenant_memberships: {
         Row: {
           created_at: string;
@@ -2575,6 +2611,17 @@ export type Database = {
         };
         Returns: string;
       };
+      convert_lead_to_student: {
+        Args: {
+          p_confirm_duplicate?: boolean;
+          p_customer?: string;
+          p_lead: string;
+          p_stage?: string;
+          p_student?: Json;
+          p_tenant: string;
+        };
+        Returns: string;
+      };
       create_business: {
         Args: {
           p_address?: string;
@@ -2646,6 +2693,15 @@ export type Database = {
         }[];
       };
       customer_financial_profile: {
+        Args: {
+          p_branch?: string;
+          p_customer: string;
+          p_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      customer_payment_profile: {
         Args: {
           p_branch?: string;
           p_customer: string;
@@ -3012,6 +3068,21 @@ export type Database = {
       };
       save_sales_setting: {
         Args: { p_data: Json; p_id: string; p_kind: string; p_tenant: string };
+        Returns: string;
+      };
+      save_student: {
+        Args: {
+          p_branches: string[];
+          p_confirm_duplicate?: boolean;
+          p_customer: string;
+          p_fields?: Json;
+          p_mode?: string;
+          p_profile: Json;
+          p_request: string;
+          p_student: Json;
+          p_tags?: string[];
+          p_tenant: string;
+        };
         Returns: string;
       };
       save_student_guardian: {

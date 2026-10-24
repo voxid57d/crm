@@ -24,16 +24,21 @@ export async function CustomerDirectory({
   students?: boolean;
 }) {
   const { workspace, statuses, tags, employees } = await customerOptions();
-  const base = archived
-    ? "/customers/archived"
-    : students
-      ? "/students"
+  const base = students
+    ? archived
+      ? "/students/archived"
+      : "/students"
+    : archived
+      ? "/customers/archived"
       : "/customers";
+  const label = students ? "student" : "contact";
   if (!workspace.permissions.has("customers.view"))
     return (
       <div className="rounded-xl border bg-white p-7">
         <h1 className="text-2xl font-semibold">
-          Customer access is restricted
+          {students
+            ? "Student access is restricted"
+            : "Contact access is restricted"}
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">
           Your role requires customers.view in the appropriate branches.
@@ -104,6 +109,18 @@ export async function CustomerDirectory({
       "Customer directory could not load. Check local services and permissions.",
     );
   const records = result.data;
+  const studentStates =
+    students && records.length
+      ? await workspace.supabase
+          .from("student_profiles")
+          .select("customer_id,education_status")
+          .eq("tenant_id", workspace.tenant.id)
+          .in(
+            "customer_id",
+            records.map((c) => c.id),
+          )
+      : { data: [], error: null };
+  if (studentStates.error) throw new Error("Student statuses could not load.");
   const total = records[0]?.total_count ?? 0;
   const pageLink = (next: number) => {
     const params = new URLSearchParams({ q, branch, sort, page: String(next) });
@@ -120,27 +137,52 @@ export async function CustomerDirectory({
           </p>
           <h1 className="mt-3 text-3xl font-semibold">
             {archived
-              ? "Archived customers"
+              ? students
+                ? "Archived students"
+                : "Archived contacts"
               : students
                 ? "Students"
-                : "Customers"}
+                : "Contacts"}
           </h1>
           <p className="mt-3 text-sm text-muted-foreground">
             {workspace.branch
               ? `Current branch: ${workspace.branch.name}. `
               : ""}
-            One contact record across branches, with optional education details.
+            {students
+              ? "Student details, guardians and finances in one profile."
+              : "All shared contact identities, including non-student contacts. Student management is available under Students."}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {workspace.permissions.has("customers.create") && (
             <Button asChild>
-              <Link href="/customers/new">Add customer / student</Link>
+              <Link href={students ? "/students/new" : "/customers/new"}>
+                {students ? "Add Student" : "Add contact"}
+              </Link>
             </Button>
           )}
           <Button asChild variant="outline">
-            <Link href={archived ? "/customers" : "/customers/archived"}>
-              {archived ? "Current customers" : "Archived"}
+            <Link
+              href={
+                students
+                  ? archived
+                    ? "/students"
+                    : "/students/archived"
+                  : archived
+                    ? "/customers"
+                    : "/customers/archived"
+              }
+            >
+              {archived
+                ? students
+                  ? "Current students"
+                  : "Current contacts"
+                : "Archived"}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={students ? "/customers" : "/students"}>
+              {students ? "All contacts" : "Students"}
             </Link>
           </Button>
           {(workspace.businessPermissions.has("customers.manage_settings") ||
@@ -168,7 +210,7 @@ export async function CustomerDirectory({
           ))}
         </SelectField>
         <SelectField
-          label="Customer status"
+          label={students ? "CRM status" : "Contact status"}
           name="status"
           defaultValue={filters.status ?? ""}
         >
@@ -217,7 +259,7 @@ export async function CustomerDirectory({
             ? `${total} matching ${students ? "students" : "customers"}`
             : page > 0
               ? "No records on this page"
-              : "0 matching customers"}{" "}
+              : `0 matching ${label}s`}{" "}
           · {records.length} shown
           {branch === "all"
             ? " across authorized branches"
@@ -229,9 +271,9 @@ export async function CustomerDirectory({
               <thead className="bg-muted/50 text-xs text-muted-foreground">
                 <tr>
                   {[
-                    "Customer",
+                    students ? "Student" : "Contact",
                     "Contact",
-                    "Status",
+                    students ? "Student status" : "Status",
                     "Branches",
                     "Responsible",
                     "Tags",
@@ -247,7 +289,9 @@ export async function CustomerDirectory({
                   <tr key={c.id} className="hover:bg-muted/30">
                     <td className="px-5 py-4">
                       <Link
-                        href={`/customers/${c.id}`}
+                        href={
+                          students ? `/students/${c.id}` : `/customers/${c.id}`
+                        }
                         className="font-medium text-primary hover:underline"
                       >
                         {c.first_name} {c.last_name}
@@ -265,7 +309,18 @@ export async function CustomerDirectory({
                       </p>
                     </td>
                     <td className="px-5 py-4">
-                      <Badge variant="secondary">{c.status_name}</Badge>
+                      <Badge variant="secondary">
+                        {students
+                          ? studentStates.data
+                              .find((s) => s.customer_id === c.id)
+                              ?.education_status.replaceAll("_", " ")
+                          : c.status_name}
+                      </Badge>
+                      {students && (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          CRM: {c.status_name}
+                        </p>
+                      )}
                       {archived && (
                         <Badge className="mt-2" variant="outline">
                           Archived
@@ -307,7 +362,7 @@ export async function CustomerDirectory({
               No matching {students ? "students" : "customers"}
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Try another filter or add your first customer within your
+              Try another filter or add your first {label} within your
               authorized branches.
             </p>
           </div>

@@ -5,9 +5,11 @@ import type { PaymentRow } from "@/features/finance/operations-types";
 export function PaymentTable({
   rows,
   zone,
+  identityLabel = "Customer",
 }: {
   rows: PaymentRow[];
   zone: string;
+  identityLabel?: string;
 }) {
   return (
     <div className="overflow-x-auto rounded-xl border bg-white">
@@ -17,7 +19,7 @@ export function PaymentTable({
           <tr>
             {[
               "Payment date",
-              "Customer",
+              identityLabel,
               "Cashbox / method",
               "Received",
               "Allocated",

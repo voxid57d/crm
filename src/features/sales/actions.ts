@@ -6,6 +6,7 @@ import { getLead } from "./queries";
 import { text, email, uuid, InputError } from "@/lib/validation.mjs";
 import type { ActionState } from "@/features/shared/action-state";
 import { zonedTimeToIso } from "./time.mjs";
+import { isEducationBusiness } from "@/features/workspace/business.mjs";
 
 function fail(error: unknown): ActionState {
   unstable_rethrow(error);
@@ -33,6 +34,7 @@ function refresh() {
   revalidatePath("/sales", "layout");
   revalidatePath("/leads", "layout");
   revalidatePath("/customers", "layout");
+  revalidatePath("/students", "layout");
 }
 export async function saveLead(
   _state: ActionState,
@@ -240,30 +242,38 @@ export async function convertLead(
   _state: ActionState,
   form: FormData,
 ): Promise<ActionState> {
+  let destination: string | undefined;
   try {
     const { workspace, lead } = await target(form, "leads.convert");
     if (form.get("confirm") !== "on")
       throw new InputError("Confirm conversion before continuing.");
     const customer = text(form, "customer_id");
-    const result = await workspace.supabase.rpc("convert_lead", {
-      p_tenant: workspace.tenant.id,
-      p_lead: lead.id,
-      ...(customer ? { p_customer: uuid(customer) } : {}),
-      p_confirm_duplicate: form.get("separate_customer") === "on",
-    });
+    const education = isEducationBusiness(workspace.tenant.business_type);
+    const result = await workspace.supabase.rpc(
+      education ? "convert_lead_to_student" : "convert_lead",
+      {
+        p_tenant: workspace.tenant.id,
+        p_lead: lead.id,
+        ...(customer ? { p_customer: uuid(customer) } : {}),
+        p_confirm_duplicate: form.get("separate_customer") === "on",
+      },
+    );
     if (result.error)
       return {
         error:
-          "Conversion rejected. Review customer matches, customer creation/view permission, branch compatibility, and the active conversion stage. Reopen lost leads first.",
+          "Conversion rejected. Review existing contacts/students, creation/view permissions, update permission when adding a student profile, branch compatibility and the active conversion stage. Reopen lost leads first.",
       };
     refresh();
-    return {
-      success:
-        "Lead converted and customer linked. No course enrollment was created.",
-    };
+    if (education) destination = `/students/${result.data}`;
+    else
+      return {
+        success:
+          "Lead converted and customer linked. No course enrollment was created.",
+      };
   } catch (error) {
     return fail(error);
   }
+  redirect(destination!);
 }
 export async function saveSalesSetting(
   _state: ActionState,

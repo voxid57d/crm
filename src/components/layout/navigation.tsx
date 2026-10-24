@@ -78,7 +78,13 @@ const groups = [
   },
 ];
 
-export function Navigation({ onNavigate }: { onNavigate?: () => void }) {
+export function Navigation({
+  onNavigate,
+  education = false,
+}: {
+  onNavigate?: () => void;
+  education?: boolean;
+}) {
   const pathname = usePathname();
   return (
     <nav aria-label="Main navigation" className="space-y-7">
@@ -88,30 +94,32 @@ export function Navigation({ onNavigate }: { onNavigate?: () => void }) {
             {group.label}
           </p>
           <div className="space-y-1">
-            {group.links.map(({ href, label, icon: Icon }) => (
-              <Link
-                onClick={onNavigate}
-                key={href}
-                href={href}
-                aria-current={
-                  pathname === href ||
-                  (!["/sales", "/finance"].includes(href) &&
-                    pathname.startsWith(href + "/"))
-                    ? "page"
-                    : undefined
-                }
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white",
-                  (pathname === href ||
+            {group.links
+              .filter((link) => !education || link.href !== "/customers")
+              .map(({ href, label, icon: Icon }) => (
+                <Link
+                  onClick={onNavigate}
+                  key={href}
+                  href={href}
+                  aria-current={
+                    pathname === href ||
                     (!["/sales", "/finance"].includes(href) &&
-                      pathname.startsWith(href + "/"))) &&
-                    "bg-[#26493f] text-[#bcf2da] hover:bg-[#26493f]",
-                )}
-              >
-                <Icon size={17} strokeWidth={1.7} aria-hidden="true" />
-                {label}
-              </Link>
-            ))}
+                      pathname.startsWith(href + "/"))
+                      ? "page"
+                      : undefined
+                  }
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-300 transition-colors hover:bg-white/5 hover:text-white",
+                    (pathname === href ||
+                      (!["/sales", "/finance"].includes(href) &&
+                        pathname.startsWith(href + "/"))) &&
+                      "bg-[#26493f] text-[#bcf2da] hover:bg-[#26493f]",
+                  )}
+                >
+                  <Icon size={17} strokeWidth={1.7} aria-hidden="true" />
+                  {label}
+                </Link>
+              ))}
           </div>
         </div>
       ))}

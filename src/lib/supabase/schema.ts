@@ -21,10 +21,18 @@ export type Database = Omit<GeneratedDatabase, "public"> & {
   public: Omit<GeneratedDatabase["public"], "Functions"> & {
     Functions: Omit<
       Functions,
-      IdFunction | "save_student_guardian" | "save_invoice_draft"
+      | IdFunction
+      | "save_student_guardian"
+      | "save_invoice_draft"
+      | "save_student"
     > & {
       [K in IdFunction]: NullableId<K>;
     } & {
+      save_student: Omit<Functions["save_student"], "Args"> & {
+        Args: Omit<Functions["save_student"]["Args"], "p_customer"> & {
+          p_customer: string | null;
+        };
+      };
       save_invoice_draft: Omit<Functions["save_invoice_draft"], "Args"> & {
         Args: Omit<Functions["save_invoice_draft"]["Args"], "p_invoice"> & {
           p_invoice: string | null;

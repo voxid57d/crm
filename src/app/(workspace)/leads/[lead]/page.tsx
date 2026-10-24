@@ -16,6 +16,7 @@ import { ActivityItem } from "@/components/customers/activity";
 import { Field, SelectField } from "@/components/forms/field";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { isEducationBusiness } from "@/features/workspace/business.mjs";
 
 export const metadata = { title: "Lead profile" };
 export default async function LeadProfile({
@@ -37,6 +38,7 @@ export default async function LeadProfile({
     reasons,
     employeeChoices,
   } = options;
+  const education = isEducationBusiness(workspace.tenant.business_type);
   const permission = (key: string) =>
     workspace.branchPermissions.get(lead.branch_id)?.has(key) ?? false;
   const activityPage = pageNumber(filters.activity_page),
@@ -121,6 +123,15 @@ export default async function LeadProfile({
     throw new Error(
       "Lead history or conversion options could not load. Verify local services.",
     );
+  const linkedStudent = lead.customer_id
+    ? await workspace.supabase
+        .from("student_profiles")
+        .select("customer_id")
+        .eq("tenant_id", workspace.tenant.id)
+        .eq("customer_id", lead.customer_id)
+        .maybeSingle()
+    : { data: null, error: null };
+  if (linkedStudent.error) throw new Error("Linked student could not load.");
   const employees = Array.from(
     new Map(
       Object.values(employeeChoices)
@@ -476,7 +487,9 @@ export default async function LeadProfile({
         id="conversion"
         className="space-y-4 rounded-xl border bg-white p-5"
       >
-        <h2 className="text-lg font-semibold">Customer conversion</h2>
+        <h2 className="text-lg font-semibold">
+          {education ? "Student conversion" : "Customer conversion"}
+        </h2>
         {lead.customer_id ? (
           <>
             <p className="text-sm">
@@ -496,32 +509,64 @@ export default async function LeadProfile({
               )}
             {linkedCustomer.data ? (
               <Link
-                href={`/customers/${lead.customer_id}`}
+                href={
+                  education && linkedStudent.data
+                    ? `/students/${lead.customer_id}`
+                    : `/customers/${lead.customer_id}`
+                }
                 className="text-sm font-medium text-primary underline"
               >
-                Open customer: {linkedCustomer.data.first_name}{" "}
-                {linkedCustomer.data.last_name}
+                {education && linkedStudent.data
+                  ? "Open student:"
+                  : "Open contact:"}{" "}
+                {linkedCustomer.data.first_name} {linkedCustomer.data.last_name}
               </Link>
             ) : (
               <p className="text-sm text-muted-foreground">
                 The linked customer is outside your customer-view scope.
               </p>
             )}
+            {education &&
+              linkedCustomer.data &&
+              !linkedStudent.data &&
+              !lead.archived_at &&
+              permission("leads.convert") && (
+                <ActionForm
+                  action={convertLead}
+                  submit="Add student profile"
+                  confirmation="Add a student profile to this existing converted contact? Its identity, sales and financial history remain linked."
+                >
+                  <SalesIdentity tenantId={workspace.tenant.id} leadId={id} />
+                  <input
+                    type="hidden"
+                    name="customer_id"
+                    value={lead.customer_id}
+                  />
+                  <input type="hidden" name="confirm" value="on" />
+                  <p className="text-sm text-muted-foreground">
+                    This historical conversion has a contact without a student
+                    profile. Add one explicitly; no invoice or course enrollment
+                    is created.
+                  </p>
+                </ActionForm>
+              )}
           </>
         ) : !lead.archived_at &&
           lead.status === "open" &&
           permission("leads.convert") ? (
           <>
             <p className="text-sm text-muted-foreground">
-              Review matches before creating a new contact. Linking preserves
-              the existing customer’s details and requires its branch
-              assignments to include this lead’s branch. No student/course
-              enrollment is created.
+              Review existing student/contact matches first. Linking preserves
+              shared identity details and requires the lead branch to be
+              assigned.{" "}
+              {education
+                ? "Conversion creates or reuses a student profile and opens it. No invoice or course enrollment is created."
+                : "Generic conversion creates or links a contact without creating a student or course enrollment."}
             </p>
             {matches.data.length > 0 && (
               <div className="rounded-lg border p-3 text-sm">
                 <p className="mb-2 font-medium">
-                  Possible existing customer matches
+                  Possible existing student / contact matches
                 </p>
                 {matches.data.map((c) => (
                   <p key={c.id}>
@@ -538,12 +583,12 @@ export default async function LeadProfile({
             )}
             <form className="flex flex-wrap items-end gap-3">
               <Field
-                label="Find an existing customer by name / phone / email"
+                label="Find an existing student / contact by name, phone or email"
                 name="customer_q"
                 defaultValue={customerSearch}
                 maxLength={100}
               />
-              <Button variant="outline">Search customers</Button>
+              <Button variant="outline">Search contacts</Button>
             </form>
             <ActionForm
               action={convertLead}
@@ -551,8 +596,16 @@ export default async function LeadProfile({
               confirmation="Confirm conversion? This permanently links the sales outcome to the selected customer or creates a new contact. The original lead and history remain."
             >
               <SalesIdentity tenantId={workspace.tenant.id} leadId={id} />
-              <SelectField label="Customer" name="customer_id" defaultValue="">
-                <option value="">Create a new customer from this lead</option>
+              <SelectField
+                label={education ? "Student or existing contact" : "Customer"}
+                name="customer_id"
+                defaultValue=""
+              >
+                <option value="">
+                  {education
+                    ? "Create a new student from this lead"
+                    : "Create a new customer from this lead"}
+                </option>
                 {customerChoices.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}

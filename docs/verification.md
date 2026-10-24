@@ -1,6 +1,29 @@
-﻿# Verification record — 24 October 2026 (through Step 6E)
+﻿# Verification record — 24 October 2026 (through Step 6F)
 
-## Steps 6C–6E: current verification
+## Step 6F: current verification
+
+The actual architecture and plan were documented before implementation in [student-first.md](student-first.md). The initial tree was clean. Docker Desktop and the dev server were stopped; both were started locally with retained data. No dependency, hosted connection, database reset or bulk identity conversion was introduced.
+
+| Check                         | Result                                                                                                                                       |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Portable tests                | **165 passed**, including atomic student creation/conversion, duplicate handling, unchanged finance during promotion and payment-only access |
+| Full live integration         | **65 passed across 9 suites**, using real local Auth/PostgREST/Storage and rendered forms                                                    |
+| Final focused student recheck | **10 passed** after the form-intent guard, including stale promotion preserving an existing student                                          |
+| Native PostgreSQL             | **151 assertions passed across 11 suites**, fixtures rolled back                                                                             |
+| Route smoke                   | **69 protected routes** passed; public/platform/callback boundaries also passed                                                              |
+| Schema lint                   | No new issues; existing unused variable `m` warning in `save_employee` remains                                                               |
+
+The first parallel live run hit an existing 10-second employee-render timeout under dev-server compilation contention (63/65 counted passes). Integration files now run serially against the single dev server; the complete rerun passed. Explicit concurrent allocation/transfer/refund/conversion tests remain concurrent within suites.
+
+Real student form tests verify one shared identity/profile, generated identifiers, invalid/duplicate rollback, old URL compatibility, shared guardians, unchanged invoice/payment/refund links and exact debt/credit during contact promotion, new/repeated/concurrent/link-existing lead conversion, historical promotion without attribution changes, generic retail conversion, archive/restore, forged tenants, hidden multi-branch students and independent finance access. Existing Auth, employees/salary, customers, sales and finance suites passed.
+
+Two additive migrations add one client-inaccessible RLS request table, checked save/conversion wrappers and a read-only payment-profile adapter. Existing posted financial records and calculation functions are unchanged. Inspection found zero orphan student profiles and zero guardian links missing a student. Non-student contacts were retained.
+
+Remaining manual checks: visual/mobile/keyboard/focus, interactive duplicate selection, browser redirects/native confirmation, earlier sales dragging, invoice print layout, recovery-email link redemption and production-size load testing. No courses/groups/enrollments/lessons/attendance, automatic billing or deployment was added. Guardians remain reusable independent contacts; structured third-party payer attribution/customer-to-guardian identity unification remains future work. Use the [manual student walkthrough](student-first.md#manual-testing) before Step 7.
+
+Final ESLint, strict TypeScript, optimized production build, Prettier and Git whitespace checks passed after the student form-intent guard. The two additive migrations are applied locally and generated TypeScript database types are current.
+
+## Steps 6C–6E: historical verification
 
 Completed against local Supabase and the existing Next.js server at `http://127.0.0.1:3000`. No dependency installation, hosted connection, reset or deletion of existing business data was performed. Additive migrations preserve populated cash/invoice/audit history. Local Git checkpoints separate 6C and 6D; the final checkpoint includes reporting/documentation. No remote push or deployment is implied.
 

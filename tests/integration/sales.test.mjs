@@ -330,8 +330,8 @@ test("real local sales forms, Kanban data, follow-ups, conversion and authorizat
         confirm: "on",
         customer_id: "",
       });
-      assert.equal(converted.response.status, 200);
-      assert.ok(converted.html.includes("Lead converted and customer linked"));
+      assert.equal(converted.response.status, 303);
+      assert.match(converted.response.headers.get("location"), /^\/students\//);
       const l = await owner.client
         .from("leads")
         .select("*")
@@ -359,7 +359,12 @@ test("real local sales forms, Kanban data, follow-ups, conversion and authorizat
         confirm: "on",
         customer_id: customer,
       });
-      assert.ok(linked.html.includes("Lead converted and customer linked"));
+      assert.equal(linked.response.status, 303);
+      assert.ok(
+        linked.response.headers
+          .get("location")
+          .includes(`/students/${customer}`),
+      );
       const count = await owner.client
         .from("customers")
         .select("id", { count: "exact" })

@@ -19,10 +19,12 @@ export function AppShell({
   children,
   workspaceBar,
   accountMenu,
+  education = false,
 }: {
   children: React.ReactNode;
   workspaceBar?: React.ReactNode;
   accountMenu?: React.ReactNode;
+  education?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -39,7 +41,7 @@ export function AppShell({
               ? "Your businesses"
               : pathname.startsWith("/customers")
                 ? "Customers"
-                : pathname === "/students"
+                : pathname.startsWith("/students")
                   ? "Students"
                   : pathname.startsWith("/employees")
                     ? "Employees"
@@ -63,7 +65,7 @@ export function AppShell({
         <div className="px-2 pb-9 pt-3">
           <Brand />
         </div>
-        <Navigation />
+        <Navigation education={education} />
         <div className="mt-auto pt-8">
           <div className="rounded-xl border border-white/10 bg-white/5 p-4">
             <p className="text-sm font-medium text-white">A place to grow.</p>
@@ -119,7 +121,10 @@ export function AppShell({
                     </Button>
                   </SheetClose>
                 </div>
-                <Navigation onNavigate={() => setOpen(false)} />
+                <Navigation
+                  onNavigate={() => setOpen(false)}
+                  education={education}
+                />
               </SheetContent>
             </Sheet>
             <div className="text-sm">

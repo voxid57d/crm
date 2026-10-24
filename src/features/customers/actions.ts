@@ -7,6 +7,7 @@ import { customerOptions, getCustomer } from "./queries";
 import { text, email, uuid, InputError } from "@/lib/validation.mjs";
 import type { ActionState } from "@/features/shared/action-state";
 import type { DuplicateState } from "./types";
+import { parseCustomerForm } from "./parsers";
 
 function failed(error: unknown): ActionState {
   unstable_rethrow(error);
@@ -42,20 +43,9 @@ async function target(form: FormData, permission: string) {
   scope(workspace, record.branchIds, permission);
   return record;
 }
-function date(form: FormData, name: string) {
-  const value = text(form, name, { max: 10, label: name.replaceAll("_", " ") });
-  if (
-    value &&
-    (!/^\d{4}-\d{2}-\d{2}$/.test(value) ||
-      Number.isNaN(Date.parse(value)) ||
-      new Date(value).toISOString().slice(0, 10) !== value)
-  )
-    throw new InputError("Enter a valid calendar date.");
-  return value;
-}
 function refresh() {
   revalidatePath("/customers", "layout");
-  revalidatePath("/students");
+  revalidatePath("/students", "layout");
 }
 export async function saveCustomer(
   _state: ActionState,
@@ -75,55 +65,10 @@ export async function saveCustomer(
         throw new InputError("Restore this customer before editing.");
     }
     const options = await customerOptions();
-    const fields: Record<string, string> = {};
-    for (const field of options.fields.filter((f) => f.is_active))
-      fields[field.id] = text(form, `field_${field.id}`, {
-        max: 2000,
-        label: field.name,
-      });
-    const student =
-      form.get("student_enabled") === "on"
-        ? {
-            student_identifier: text(form, "student_identifier", {
-              min: 1,
-              max: 80,
-              label: "Student identifier",
-            }),
-            education_status: text(form, "education_status"),
-            school: text(form, "school", { max: 200 }),
-            education_level: text(form, "education_level", { max: 150 }),
-            learning_goals: text(form, "learning_goals", { max: 2000 }),
-            additional_information: text(form, "additional_information", {
-              max: 3000,
-            }),
-            enrollment_date: date(form, "enrollment_date"),
-          }
-        : null;
-    const responsible = text(form, "responsible_employee_id");
-    const status = text(form, "status_id");
     const result = await workspace.supabase.rpc("save_customer", {
       p_tenant: workspace.tenant.id,
       p_id: id,
-      p_branches: branches,
-      p_tags: form.getAll("tag_ids").map(uuid),
-      p_fields: fields,
-      p_student: student,
-      p_profile: {
-        first_name: text(form, "first_name", {
-          min: 1,
-          max: 100,
-          label: "First name",
-        }),
-        last_name: text(form, "last_name", { max: 100, label: "Last name" }),
-        phone: text(form, "phone", { min: 3, max: 40, label: "Phone" }),
-        additional_phone: text(form, "additional_phone", { max: 40 }),
-        email: email(form, "email", true),
-        date_of_birth: date(form, "date_of_birth"),
-        gender: text(form, "gender"),
-        address: text(form, "address", { max: 1000 }),
-        status_id: status ? uuid(status) : "",
-        responsible_employee_id: responsible ? uuid(responsible) : "",
-      },
+      ...parseCustomerForm(form, options),
     });
     if (result.error)
       return {
@@ -139,12 +84,77 @@ export async function saveCustomer(
   refresh();
   redirect(`/customers/${saved}?saved=1`);
 }
+export async function saveStudent(
+  _state: ActionState,
+  form: FormData,
+): Promise<ActionState> {
+  let saved: string;
+  try {
+    const workspace = await context(form),
+      id = form.get("customer_id") ? uuid(form.get("customer_id")) : null,
+      old = id ? await getCustomer(id) : null;
+    if (old) {
+      scope(workspace, old.branchIds, "customers.update");
+      if (old.customer.archived_at)
+        throw new InputError(
+          "Restore this contact before adding or editing its student profile.",
+        );
+    }
+    const options = await customerOptions(),
+      input = parseCustomerForm(form, options, true);
+    scope(
+      workspace,
+      input.p_branches,
+      id ? "customers.update" : "customers.create",
+    );
+    scope(workspace, input.p_branches, "customers.view");
+    if (!input.p_student) throw new InputError("Student details are required.");
+    const mode = text(form, "student_mode");
+    if (
+      !["create", "edit"].includes(mode) ||
+      (mode === "edit" && !old?.student)
+    )
+      throw new InputError(
+        "This student form is no longer valid. Reload before saving.",
+      );
+    const r = await workspace.supabase.rpc("save_student", {
+      p_tenant: workspace.tenant.id,
+      p_request: uuid(form.get("request_id")),
+      p_customer: id,
+      ...input,
+      p_student: input.p_student,
+      p_mode: mode,
+      p_confirm_duplicate: form.get("separate_contact") === "on",
+    });
+    if (r.error)
+      return {
+        error:
+          r.error.code === "23505"
+            ? "That student identifier is already in use. Reuse the existing student or choose another identifier."
+            : r.error.message.startsWith("Possible existing")
+              ? "Possible existing contact or student. Check matches above and use the existing contact, or confirm this is a separate person."
+              : r.error.message.includes("request identifier")
+                ? "This form was already used with different details. Reload before saving another change."
+                : "Student could not save. Check branch permissions, student fields, active contact status and employee assignment. All changes were rolled back.",
+      };
+    saved = r.data;
+  } catch (e) {
+    return failed(e);
+  }
+  refresh();
+  redirect(`/students/${saved}?saved=1`);
+}
 export async function archiveCustomer(
   _state: ActionState,
   form: FormData,
 ): Promise<ActionState> {
   try {
-    const { workspace, customer } = await target(form, "customers.archive");
+    const { workspace, customer, student } = await target(
+      form,
+      "customers.archive",
+    );
+    const entity =
+      form.get("student_first") === "on" && student ? "Student" : "Customer";
     const archive = text(form, "archive");
     if (!["true", "false"].includes(archive))
       throw new InputError("Choose archive or restore.");
@@ -159,8 +169,8 @@ export async function archiveCustomer(
     return {
       success:
         archive === "true"
-          ? "Customer archived. Records and history are retained."
-          : "Customer restored.",
+          ? `${entity} archived. Records and history are retained.`
+          : `${entity} restored.`,
     };
   } catch (error) {
     return failed(error);

@@ -9,6 +9,7 @@ const titles: Record<string, string> = {
   responsible_changed: "Responsible employee changed",
   tags_changed: "Tags changed",
   student_updated: "Student profile updated",
+  lead_converted: "Lead converted and linked",
   custom_fields_updated: "Custom fields updated",
   archived: "Customer archived",
   restored: "Customer restored",
@@ -28,11 +29,13 @@ export function ActivityItem({
   at,
   labels,
   entity = "Customer",
+  createdLabel,
 }: {
   activity: Pick<Activity, "kind" | "detail" | "actor_name">;
   at: string;
   labels: Record<string, string>;
   entity?: string;
+  createdLabel?: string;
 }) {
   const detail = object(activity.detail);
   const show = (value: Json | undefined): string =>
@@ -78,7 +81,12 @@ export function ActivityItem({
   return (
     <article className="rounded-xl border bg-white p-4">
       <p className="text-sm font-medium">
-        {(titles[activity.kind] ?? activity.kind.replaceAll("_", " "))
+        {(activity.kind === "created" && createdLabel
+          ? createdLabel
+          : activity.kind === "student_updated" && detail.before === null
+            ? "Student profile added"
+            : (titles[activity.kind] ?? activity.kind.replaceAll("_", " "))
+        )
           .replace(/^Customer/, entity)
           .replace(/^Contact details/, `${entity} details`)}
       </p>

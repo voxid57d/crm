@@ -11,12 +11,14 @@ export function DuplicateChecker({
   phone = "",
   email = "",
   name = "",
+  studentFirst = false,
 }: {
   tenantId: string;
   customerId?: string;
   phone?: string;
   email?: string;
   name?: string;
+  studentFirst?: boolean;
 }) {
   const [state, action, pending] = useActionState(findDuplicates, {});
   return (
@@ -70,10 +72,17 @@ export function DuplicateChecker({
               : state.matches.map((m) => (
                   <p key={m.id}>
                     <Link
-                      href={`/customers/${m.id}`}
+                      href={
+                        studentFirst && !m.archived
+                          ? `/students/new?existing=${m.id}`
+                          : `/customers/${m.id}`
+                      }
                       className="font-medium text-primary underline"
                     >
                       {m.full_name}
+                      {studentFirst && !m.archived
+                        ? " — Use this contact / student"
+                        : ""}
                     </Link>{" "}
                     · {m.phone} · {m.match_reason}
                     {m.archived ? " · Archived" : ""}

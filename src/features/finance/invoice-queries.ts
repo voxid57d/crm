@@ -141,3 +141,39 @@ export async function customerFinance(
     }),
   };
 }
+export function canCustomerDebt(w: Workspace) {
+  return (
+    (w.businessPermissions.has("invoices.view") &&
+      w.businessPermissions.has("debts.view")) ||
+    w.branches.some(
+      (b) =>
+        w.branchPermissions.get(b.id)?.has("invoices.view") &&
+        w.branchPermissions.get(b.id)?.has("debts.view"),
+    )
+  );
+}
+export function canCustomerFinance(w: Workspace) {
+  return canCustomerDebt(w) || w.permissions.has("payments.view");
+}
+export async function customerPaymentProfile(
+  customerId: string,
+  branch?: string,
+  page = 0,
+) {
+  const w = await getWorkspace();
+  uuid(customerId);
+  if (branch) uuid(branch);
+  const r = await w.supabase.rpc("customer_payment_profile", {
+    p_tenant: w.tenant.id,
+    p_customer: customerId,
+    ...(branch ? { p_branch: branch } : {}),
+    p_page: page,
+  });
+  if (r.error?.code === "42501") notFound();
+  if (r.error) throw new Error("Payment overview could not load.");
+  return r.data as unknown as {
+    can_view_payments: boolean;
+    payment_summary: { received: string; allocated: string; credit: string };
+    payments: { rows: PaymentRow[]; total: number };
+  };
+}

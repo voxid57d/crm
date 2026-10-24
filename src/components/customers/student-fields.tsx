@@ -3,19 +3,26 @@ import { useState } from "react";
 import { Field, SelectField } from "@/components/forms/field";
 import type { Student } from "@/features/customers/types";
 
-export function StudentFields({ student }: { student: Student | null }) {
-  const [enabled, setEnabled] = useState(Boolean(student));
+export function StudentFields({
+  student,
+  requiredStudent = false,
+}: {
+  student: Student | null;
+  requiredStudent?: boolean;
+}) {
+  const [enabled, setEnabled] = useState(requiredStudent || Boolean(student));
   return (
     <fieldset className="space-y-4 rounded-xl border p-4">
       <legend className="px-1 text-sm font-medium">
-        Education profile (optional)
+        {requiredStudent ? "Student details" : "Education profile (optional)"}
       </legend>
-      {student ? (
+      {student || requiredStudent ? (
         <>
           <input type="hidden" name="student_enabled" value="on" />
           <p className="text-sm text-muted-foreground">
-            Student profile linked to this contact. Change education status to
-            retain its history when studies end.
+            {requiredStudent
+              ? "Save student and contact details together. A student profile does not create a course enrollment."
+              : "Student profile linked to this contact. Change education status to retain its history when studies end."}
           </p>
         </>
       ) : (
@@ -33,14 +40,18 @@ export function StudentFields({ student }: { student: Student | null }) {
       {enabled && (
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
-            label="Student identifier"
+            label={
+              requiredStudent && !student
+                ? "Student identifier (optional; generated when blank)"
+                : "Student identifier"
+            }
             name="student_identifier"
-            required
+            required={!requiredStudent}
             maxLength={80}
             defaultValue={student?.student_identifier}
           />
           <SelectField
-            label="Education status"
+            label={requiredStudent ? "Student status" : "Education status"}
             name="education_status"
             defaultValue={student?.education_status ?? "active"}
           >
@@ -65,7 +76,11 @@ export function StudentFields({ student }: { student: Student | null }) {
             defaultValue={student?.education_level ?? ""}
           />
           <Field
-            label="Enrollment date (optional)"
+            label={
+              requiredStudent
+                ? "Student start date (optional)"
+                : "Enrollment date (optional)"
+            }
             name="enrollment_date"
             type="date"
             defaultValue={student?.enrollment_date ?? ""}

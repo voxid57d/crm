@@ -91,3 +91,8 @@ export const getCustomer = cache(async (id: string) => {
     values: values.data,
   };
 });
+export const getStudent = cache(async (id: string) => {
+  const record = await getCustomer(id);
+  if (!record.student) notFound();
+  return { ...record, student: record.student };
+});

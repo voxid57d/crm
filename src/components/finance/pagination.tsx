@@ -6,17 +6,19 @@ export function FinancePagination({
   page,
   total,
   pageKey = "page",
+  anchor = "",
 }: {
   path: string;
   filters: Record<string, string>;
   page: number;
   total: number;
   pageKey?: string;
+  anchor?: string;
 }) {
   const href = (next: number) => {
     const params = new URLSearchParams(filters);
     params.set(pageKey, String(next));
-    return `${path}?${params}`;
+    return `${path}?${params}${anchor}`;
   };
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
