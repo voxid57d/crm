@@ -12,7 +12,8 @@ type IdFunction =
   | "save_lead"
   | "save_lead_followup"
   | "save_sales_setting"
-  | "save_cashbox";
+  | "save_cashbox"
+  | "save_expense_category";
 type NullableId<K extends IdFunction> = Omit<Functions[K], "Args"> & {
   Args: Omit<Functions[K]["Args"], "p_id"> & { p_id: string | null };
 };

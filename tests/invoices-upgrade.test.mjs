@@ -37,7 +37,11 @@ test("invoice upgrade preserves populated cash ledger and audit history", async 
   const after = (
     await db.query("select public.cashbox_details($1,$2) value", [tenant, box])
   ).rows[0].value;
-  assert.deepEqual(after, before);
+  assert.equal(after.cashbox.allow_negative, false);
+  assert.deepEqual(after, {
+    ...before,
+    cashbox: { ...before.cashbox, allow_negative: false },
+  });
   assert.equal(after.balance, "9007199254740993.01");
   assert.equal(
     (await db.query("select count(*)::int n from public.invoices")).rows[0].n,

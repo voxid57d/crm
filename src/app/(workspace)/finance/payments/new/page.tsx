@@ -4,7 +4,7 @@ import { getInvoice } from "@/features/finance/invoice-queries";
 import { hasFinance } from "@/features/finance/operations-queries";
 import { value } from "@/features/finance/queries";
 import { uuid } from "@/lib/validation.mjs";
-import { localDateTime } from "@/lib/time.mjs";
+import { financialDateTime as localDateTime } from "@/lib/time.mjs";
 import { postPayment } from "@/features/finance/operations-actions";
 import { ActionForm } from "@/components/forms/action-form";
 import { Field, SelectField } from "@/components/forms/field";
@@ -131,6 +131,7 @@ export default async function NewPayment({
               label={`Received at (${w.tenant.timezone})`}
               name="occurred_at"
               type="datetime-local"
+              step="1"
               required
               defaultValue={localDateTime(
                 new Date().toISOString(),

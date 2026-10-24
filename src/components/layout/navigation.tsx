@@ -49,13 +49,21 @@ const groups = [
     links: [
       {
         href: "/finance",
-        label: "Financial foundation",
+        label: "Financial dashboard",
         icon: CircleDollarSign,
       },
       { href: "/finance/cashboxes", label: "Cashboxes", icon: Building2 },
       { href: "/finance/invoices", label: "Invoices", icon: CircleDollarSign },
       { href: "/finance/payments", label: "Payments", icon: CircleDollarSign },
       { href: "/finance/debts", label: "Receivables", icon: BarChart3 },
+      { href: "/finance/expenses", label: "Expenses", icon: CircleDollarSign },
+      {
+        href: "/finance/transfers",
+        label: "Cashbox transfers",
+        icon: CircleDollarSign,
+      },
+      { href: "/finance/refunds", label: "Refunds", icon: CircleDollarSign },
+      { href: "/finance/reports", label: "Financial reports", icon: BarChart3 },
     ],
   },
   {

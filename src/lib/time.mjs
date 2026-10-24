@@ -16,8 +16,14 @@ export function localDateTime(iso, zone) {
   );
   return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
 }
-/** @param {string} local @param {string} zone */
+/** @param {string} local @param {string} zone @returns {string} */
 export function zonedTimeToIso(local, zone) {
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:[0-5][0-9]$/.test(local)) {
+    return new Date(
+      Date.parse(zonedTimeToIso(local.slice(0, 16), zone)) +
+        Number(local.slice(17)) * 1000,
+    ).toISOString();
+  }
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(local))
     throw new Error("Choose a valid scheduled date and time.");
   const target = Date.parse(local + "Z");
@@ -38,4 +44,14 @@ export function zonedTimeToIso(local, zone) {
       "This time does not exist in the business timezone. Choose another time.",
     );
   return new Date(guess).toISOString();
+}
+/** @param {string} iso @param {string} zone */
+export function financialDateTime(iso, zone) {
+  return (
+    localDateTime(iso, zone) +
+    ":" +
+    new Intl.DateTimeFormat("en-GB", { timeZone: zone, second: "2-digit" })
+      .format(new Date(iso))
+      .padStart(2, "0")
+  );
 }

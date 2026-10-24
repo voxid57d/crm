@@ -10,6 +10,20 @@ export default function FinanceLayout({
         aria-label="Finance navigation"
         className="flex flex-wrap gap-4 border-b pb-4 text-sm"
       >
+        {[
+          ["/finance/expenses", "Expenses"],
+          ["/finance/transfers", "Transfers"],
+          ["/finance/refunds", "Refunds"],
+          ["/finance/reports", "Reports"],
+        ].map(([href, label]) => (
+          <Link
+            className="text-primary underline underline-offset-4"
+            href={href}
+            key={href}
+          >
+            {label}
+          </Link>
+        ))}
         <Link
           className="text-primary underline underline-offset-4"
           href="/finance"

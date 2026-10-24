@@ -14,12 +14,23 @@ import {
 import { formatMoney } from "@/features/finance/money.mjs";
 import type { FinanceSearch } from "@/features/finance/types";
 import type { Json } from "@/lib/supabase/database.types";
+import { ActionForm } from "@/components/forms/action-form";
+import {
+  OperationIdentity,
+  FinancialConfirmation,
+} from "@/components/finance/operation-fields";
+import { setOverdraft } from "@/features/finance/operations-actions";
 export const metadata = { title: "Cashbox history" };
 const labels: Record<string, string> = {
   opening_balance: "Opening balance",
   adjustment: "Adjustment",
   cashbox_created: "Cashbox created",
   cashbox_updated: "Cashbox updated",
+  payment: "Payment",
+  expense: "Expense",
+  transfer: "Transfer",
+  refund: "Refund",
+  reversal: "Reversal",
 };
 function AuditValues({ data }: { data: Json }) {
   if (!data || typeof data !== "object" || Array.isArray(data)) return null;
@@ -29,6 +40,7 @@ function AuditValues({ data }: { data: Json }) {
     is_active: "Active",
     amount: "Amount",
     currency: "Currency",
+    allow_negative: "Allow overdraft",
   };
   return (
     <dl className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -130,6 +142,43 @@ export default async function CashboxProfile({
           {workspace.tenant.timezone}.
         </p>
       </section>
+      {workspace.user.id === workspace.tenant.owner_id && manage && (
+        <details className="rounded-xl border bg-white p-5">
+          <summary className="cursor-pointer font-medium">
+            Overdraft policy:{" "}
+            {b.allow_negative ? "Allowed" : "Blocked (default)"}
+          </summary>
+          <ActionForm
+            action={setOverdraft}
+            submit="Save overdraft policy"
+            confirmation="Change this cashbox overdraft policy?"
+            className="mt-4 space-y-4"
+          >
+            <OperationIdentity
+              tenantId={workspace.tenant.id}
+              fields={{ cashbox_id: id, version: String(b.version) }}
+            />
+            <SelectField
+              label="Insufficient balance policy"
+              name="allow_negative"
+              defaultValue={String(b.allow_negative)}
+            >
+              <option value="false">
+                Reject outflows that would make balance negative
+              </option>
+              <option value="true">Allow a negative balance</option>
+            </SelectField>
+            <Field
+              label="Owner approval reason"
+              name="reason"
+              required
+              minLength={3}
+              maxLength={1000}
+            />
+            <FinancialConfirmation />
+          </ActionForm>
+        </details>
+      )}
       {adjust && active && (
         <div className="grid items-start gap-5 xl:grid-cols-2">
           {!detail.has_entries && (
@@ -171,6 +220,13 @@ export default async function CashboxProfile({
             <option value="">All postings</option>
             <option value="opening_balance">Opening balance</option>
             <option value="adjustment">Adjustment</option>
+            {["payment", "expense", "transfer", "refund", "reversal"].map(
+              (k) => (
+                <option value={k} key={k}>
+                  {labels[k]}
+                </option>
+              ),
+            )}
           </SelectField>
           <SelectField
             label="Recorded by"
@@ -191,13 +247,17 @@ export default async function CashboxProfile({
             <caption className="sr-only">Immutable cashbox ledger</caption>
             <thead className="bg-muted/50">
               <tr>
-                {["Posted at", "Type", "Amount", "Recorded by", "Reason"].map(
-                  (h) => (
-                    <th key={h} scope="col" className="p-4 font-medium">
-                      {h}
-                    </th>
-                  ),
-                )}
+                {[
+                  "Effective date",
+                  "Type",
+                  "Amount",
+                  "Recorded by",
+                  "Reason",
+                ].map((h) => (
+                  <th key={h} scope="col" className="p-4 font-medium">
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -206,7 +266,14 @@ export default async function CashboxProfile({
                   <td className="whitespace-nowrap p-4">
                     {financeDate(row.posted_at, workspace.tenant.timezone)}
                   </td>
-                  <td className="p-4">{labels[row.kind] ?? row.kind}</td>
+                  <td className="p-4">
+                    <Link
+                      className="text-primary underline"
+                      href={`/finance/transactions/${row.transaction_id}`}
+                    >
+                      {labels[row.kind] ?? row.kind}
+                    </Link>
+                  </td>
                   <td className="whitespace-nowrap p-4 text-right font-medium tabular-nums">
                     {formatMoney(row.amount, row.currency)}
                   </td>

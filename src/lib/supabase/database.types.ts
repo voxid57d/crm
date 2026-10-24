@@ -168,8 +168,65 @@ export type Database = {
           },
         ];
       };
+      cashbox_transfers: {
+        Row: {
+          amount: number;
+          currency: string;
+          destination_id: string;
+          id: string;
+          occurred_at: string;
+          source_id: string;
+          tenant_id: string;
+          transaction_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount: number;
+          currency: string;
+          destination_id: string;
+          id?: string;
+          occurred_at: string;
+          source_id: string;
+          tenant_id: string;
+          transaction_id: string;
+        };
+        Update: {
+          amount?: number;
+          currency?: string;
+          destination_id?: string;
+          id?: string;
+          occurred_at?: string;
+          source_id?: string;
+          tenant_id?: string;
+          transaction_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "cashbox_transfers_tenant_id_destination_id_currency_fkey";
+            columns: ["tenant_id", "destination_id", "currency"];
+            isOneToOne: false;
+            referencedRelation: "cashboxes";
+            referencedColumns: ["tenant_id", "id", "currency"];
+          },
+          {
+            foreignKeyName: "cashbox_transfers_tenant_id_source_id_currency_fkey";
+            columns: ["tenant_id", "source_id", "currency"];
+            isOneToOne: false;
+            referencedRelation: "cashboxes";
+            referencedColumns: ["tenant_id", "id", "currency"];
+          },
+          {
+            foreignKeyName: "cashbox_transfers_tenant_id_transaction_id_fkey";
+            columns: ["tenant_id", "transaction_id"];
+            isOneToOne: true;
+            referencedRelation: "financial_transactions";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       cashboxes: {
         Row: {
+          allow_negative: boolean;
           branch_id: string | null;
           cashbox_type: string;
           created_at: string;
@@ -186,6 +243,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          allow_negative?: boolean;
           branch_id?: string | null;
           cashbox_type: string;
           created_at?: string;
@@ -201,6 +259,7 @@ export type Database = {
           version?: number;
         };
         Update: {
+          allow_negative?: boolean;
           branch_id?: string | null;
           cashbox_type?: string;
           created_at?: string;
@@ -862,6 +921,114 @@ export type Database = {
           },
         ];
       };
+      expense_categories: {
+        Row: {
+          id: string;
+          is_active: boolean;
+          name: string;
+          tenant_id: string;
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          tenant_id: string;
+          version?: number;
+        };
+        Update: {
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          tenant_id?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "expense_categories_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      expenses: {
+        Row: {
+          amount: number;
+          branch_id: string;
+          cashbox_id: string;
+          category_id: string;
+          category_name: string;
+          currency: string;
+          description: string;
+          id: string;
+          occurred_at: string;
+          tenant_id: string;
+          transaction_id: string;
+          vendor: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount: number;
+          branch_id: string;
+          cashbox_id: string;
+          category_id: string;
+          category_name: string;
+          currency: string;
+          description: string;
+          id?: string;
+          occurred_at: string;
+          tenant_id: string;
+          transaction_id: string;
+          vendor?: string;
+        };
+        Update: {
+          amount?: number;
+          branch_id?: string;
+          cashbox_id?: string;
+          category_id?: string;
+          category_name?: string;
+          currency?: string;
+          description?: string;
+          id?: string;
+          occurred_at?: string;
+          tenant_id?: string;
+          transaction_id?: string;
+          vendor?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "expenses_tenant_id_branch_id_fkey";
+            columns: ["tenant_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "expenses_tenant_id_cashbox_id_currency_fkey";
+            columns: ["tenant_id", "cashbox_id", "currency"];
+            isOneToOne: false;
+            referencedRelation: "cashboxes";
+            referencedColumns: ["tenant_id", "id", "currency"];
+          },
+          {
+            foreignKeyName: "expenses_tenant_id_category_id_fkey";
+            columns: ["tenant_id", "category_id"];
+            isOneToOne: false;
+            referencedRelation: "expense_categories";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "expenses_tenant_id_transaction_id_fkey";
+            columns: ["tenant_id", "transaction_id"];
+            isOneToOne: true;
+            referencedRelation: "financial_transactions";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       finance_currencies: {
         Row: {
           code: string;
@@ -952,6 +1119,55 @@ export type Database = {
           },
         ];
       };
+      financial_configuration_events: {
+        Row: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data: Json | null;
+          category_id: string;
+          created_at: string;
+          id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data?: Json | null;
+          category_id: string;
+          created_at?: string;
+          id?: string;
+          tenant_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          actor_name?: string;
+          after_data?: NonNullable<Json>;
+          before_data?: Json | null;
+          category_id?: string;
+          created_at?: string;
+          id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "financial_configuration_events_tenant_id_category_id_fkey";
+            columns: ["tenant_id", "category_id"];
+            isOneToOne: false;
+            referencedRelation: "expense_categories";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "financial_configuration_events_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       financial_ledger_entries: {
         Row: {
           amount: number;
@@ -1011,6 +1227,7 @@ export type Database = {
           posted_at: string;
           reason: string;
           request_payload: NonNullable<Json>;
+          reversal_of: string | null;
           tenant_id: string;
         };
         ComputedFields: never;
@@ -1026,6 +1243,7 @@ export type Database = {
           posted_at?: string;
           reason: string;
           request_payload: NonNullable<Json>;
+          reversal_of?: string | null;
           tenant_id: string;
         };
         Update: {
@@ -1040,6 +1258,7 @@ export type Database = {
           posted_at?: string;
           reason?: string;
           request_payload?: NonNullable<Json>;
+          reversal_of?: string | null;
           tenant_id?: string;
         };
         Relationships: [
@@ -1063,6 +1282,13 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "tenants";
             referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "financial_transactions_tenant_id_reversal_of_fkey";
+            columns: ["tenant_id", "reversal_of"];
+            isOneToOne: false;
+            referencedRelation: "financial_transactions";
+            referencedColumns: ["tenant_id", "id"];
           },
         ];
       };
@@ -1766,6 +1992,62 @@ export type Database = {
           },
         ];
       };
+      payment_refunds: {
+        Row: {
+          amount: number;
+          cashbox_id: string;
+          currency: string;
+          id: string;
+          occurred_at: string;
+          payment_id: string;
+          tenant_id: string;
+          transaction_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          amount: number;
+          cashbox_id: string;
+          currency: string;
+          id?: string;
+          occurred_at: string;
+          payment_id: string;
+          tenant_id: string;
+          transaction_id: string;
+        };
+        Update: {
+          amount?: number;
+          cashbox_id?: string;
+          currency?: string;
+          id?: string;
+          occurred_at?: string;
+          payment_id?: string;
+          tenant_id?: string;
+          transaction_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payment_refunds_tenant_id_cashbox_id_currency_fkey";
+            columns: ["tenant_id", "cashbox_id", "currency"];
+            isOneToOne: false;
+            referencedRelation: "cashboxes";
+            referencedColumns: ["tenant_id", "id", "currency"];
+          },
+          {
+            foreignKeyName: "payment_refunds_tenant_id_payment_id_fkey";
+            columns: ["tenant_id", "payment_id"];
+            isOneToOne: false;
+            referencedRelation: "payments";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "payment_refunds_tenant_id_transaction_id_fkey";
+            columns: ["tenant_id", "transaction_id"];
+            isOneToOne: true;
+            referencedRelation: "financial_transactions";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       payments: {
         Row: {
           amount: number;
@@ -2376,6 +2658,11 @@ export type Database = {
         Args: { p_filters?: Json; p_page?: number; p_tenant: string };
         Returns: Json;
       };
+      expense_category_directory: { Args: { p_tenant: string }; Returns: Json };
+      finance_operation_options: {
+        Args: { p_branch?: string; p_kind: string; p_tenant: string };
+        Returns: Json;
+      };
       finance_payment_options: {
         Args: {
           p_branch: string;
@@ -2383,6 +2670,23 @@ export type Database = {
           p_search?: string;
           p_tenant: string;
         };
+        Returns: Json;
+      };
+      financial_operation_details: {
+        Args: { p_id: string; p_kind: string; p_tenant: string };
+        Returns: Json;
+      };
+      financial_operation_directory: {
+        Args: {
+          p_filters?: Json;
+          p_kind: string;
+          p_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      financial_transaction_details: {
+        Args: { p_tenant: string; p_transaction: string };
         Returns: Json;
       };
       get_employee_salary: {
@@ -2484,6 +2788,22 @@ export type Database = {
         };
         Returns: string;
       };
+      post_cashbox_transfer: {
+        Args: {
+          p_amount: string;
+          p_at: string;
+          p_destination: string;
+          p_reason: string;
+          p_request: string;
+          p_source: string;
+          p_tenant: string;
+        };
+        Returns: string;
+      };
+      post_expense: {
+        Args: { p_data: Json; p_request: string; p_tenant: string };
+        Returns: string;
+      };
       post_payment: {
         Args: {
           p_allocations?: Json;
@@ -2493,10 +2813,32 @@ export type Database = {
         };
         Returns: string;
       };
+      post_payment_refund: {
+        Args: {
+          p_amount: string;
+          p_at: string;
+          p_cashbox: string;
+          p_payment: string;
+          p_reason: string;
+          p_request: string;
+          p_tenant: string;
+        };
+        Returns: string;
+      };
       preview_employee_invitation: { Args: { p_token: string }; Returns: Json };
       reorder_sales_stages: {
         Args: { p_pipeline: string; p_stages: string[]; p_tenant: string };
         Returns: undefined;
+      };
+      reverse_financial_transaction: {
+        Args: {
+          p_at: string;
+          p_reason: string;
+          p_request: string;
+          p_tenant: string;
+          p_transaction: string;
+        };
+        Returns: string;
       };
       revoke_employee_invitation: {
         Args: { p_employee: string; p_tenant: string };
@@ -2618,6 +2960,16 @@ export type Database = {
         };
         Returns: undefined;
       };
+      save_expense_category: {
+        Args: {
+          p_active: boolean;
+          p_id: string;
+          p_name: string;
+          p_tenant: string;
+          p_version?: number;
+        };
+        Returns: string;
+      };
       save_invoice_draft: {
         Args: {
           p_data: Json;
@@ -2663,6 +3015,17 @@ export type Database = {
           p_tenant: string;
         };
         Returns: undefined;
+      };
+      set_cashbox_overdraft: {
+        Args: {
+          p_allow: boolean;
+          p_cashbox: string;
+          p_reason: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
       };
       transition_invoice: {
         Args: {
