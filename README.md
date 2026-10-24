@@ -1,6 +1,6 @@
 ﻿# Forma — local CRM/LMS platform
 
-Next.js/TypeScript, Tailwind/shadcn, and local Supabase. Implemented domains: Auth, business/branch workspaces, employees, tenant roles, invitations, confidential salary configuration, customers/students, Sales CRM, cashboxes/ledger, and Step 6B invoices/receivables. Payments, expenses/transfers/refunds, financial reports/exports, LMS enrollment/progress, external messaging integrations, and payroll calculation remain unimplemented.
+Next.js/TypeScript, Tailwind/shadcn, and local Supabase. Implemented domains: Auth, business/branch workspaces, employees, tenant roles, invitations, confidential salary configuration, customers/students, Sales CRM, and financial management through Steps 6A–6E: cashboxes, invoices/receivables, payments/credit, expenses, transfers, refunds, corrections, dashboard and CSV reports. LMS enrollment/progress, external messaging/payment integrations, statutory accounting and payroll calculation/payouts remain unimplemented.
 
 Local Docker/Supabase is configured. Native database tests and real local Auth/API/server-form tests cover the preceding modules and sales forms, follow-ups, loss/reopening, and transactional customer conversion. Browser dragging/rollback visuals, mobile/keyboard QA, native confirmation dialogs, and recovery-email link redemption remain manual. See [verification](docs/verification.md) for exact results and limits.
 
@@ -190,7 +190,7 @@ Reports use **non-archived leads created in the selected inclusive business-loca
 7. Compare Sales Dashboard/Reports with database records using the documented creation cohort. Use separate browser profiles for Owner, branch sales staff and view-only staff; test branch/lead/tenant IDs through real requests as well as hidden controls.
 8. Complete manual pointer dragging, rollback visuals, mobile overflow, keyboard/focus, confirmation dialogs and timezone/DST edge QA. These browser interactions have not been automated here.
 
-Reproduce checks with `npm run check`, `npm run db:test`, `npm run test:smoke`, and (with local app running) `npm run test:integration`. `typecheck` runs `next typegen` before TypeScript, preventing stale route/layout definitions after adding routes. Full live integration creates sixteen real local Auth accounts plus isolated fixture businesses/records and leaves them for inspection. No external messaging, automated reminders, deployment, payment or LMS enrollment is configured. The current finance increment and remaining browser QA are described below.
+Reproduce checks with `npm run check`, `npm run db:test`, `npm run test:smoke`, and (with local app running) `npm run test:integration`. `typecheck` runs `next typegen` before TypeScript. Live integration creates real local Auth accounts and isolated fixture businesses/records and leaves them for inspection. No external messaging, automated reminders, deployment, online payment gateway or LMS enrollment is configured. Current financial workflows and remaining browser QA are described below.
 
 ## Cashboxes and ledger foundation (Step 6A)
 
@@ -207,7 +207,7 @@ Three additive migrations (`20261023000900`–`20261023001100`) add the currency
 
 Try an opening of **100.10 UZS** followed by **-0.10 UZS**: expect **100.00 UZS** and both history entries. Try zero, three decimal places and an adjustment below zero; nothing should post. Deactivate/reactivate, check retained history, then test another business/branch account. The detailed [finance architecture and walkthrough](docs/finance.md) covers each permission, constraint, manual test and future extension.
 
-The cashbox contract above remains in use. Step 6B invoices/receivables are now implemented below. Payments/allocations (6C), expenses/transfers/refunds/reversals (6D), and dashboards/reports/exports (6E) await separate instructions. Visual/mobile/keyboard/confirmation-dialog browser QA remains manual. This is an operational ledger, not statutory accounting.
+The cashbox contract above remains in use and now includes payments, expenses, refunds, transfers and reversal movements. Negative balances are blocked by default; only the actual business owner can change a cashbox's overdraft policy with an audit reason. Visual/mobile/keyboard/confirmation-dialog browser QA remains manual. This is an operational ledger, not statutory accounting.
 
 ## Invoices and customer receivables (Step 6B)
 
@@ -221,4 +221,20 @@ New permissions are `invoices.view`, `invoices.create` (also draft edit/discard)
 
 Five additive migrations (`20261023001200`–`20261023001600`) introduce four RLS-protected invoice/receivable tables and extend the shared financial audit stream. Amounts/quantities travel as decimal strings; all monetary calculations use PostgreSQL NUMERIC. No editable debt column or cash posting is introduced. The authenticated print view supports browser Print / Save PDF; actual PDF rendering, print pagination and visual/mobile/keyboard/confirmation QA remain manual.
 
-See the [invoice architecture and full walkthrough](docs/invoices.md) and [verification results](docs/verification.md). The existing local environment needs no extra dependency/configuration. **Step 6C payments, allocations and credits awaits the next instruction.** No paid/partially-paid state, manual payment, refund, expense, transfer or automated course charge is implemented in this increment.
+See the [invoice architecture](docs/invoices.md) and [verification results](docs/verification.md). Paid/partially-paid/overdue states now derive from actual allocations. Voiding an allocated invoice requires releasing its active allocations first. No automated course charge or LMS enrollment is implemented.
+
+## Test complete financial workflows (Steps 6C–6E)
+
+Use the existing local environment: `npm run db:start`, `npm run db:migrate`, then `npm run dev` if port 3000 is not serving the app. Migrations create the private receipt bucket/policies without a reset. No new dependency or hosted project is needed. Open **http://127.0.0.1:3000**, sign in and select your business/branch.
+
+1. Create two cashboxes. Create a customer and issue an invoice for **100.00 UZS**.
+2. Under **Payments → Record payment**, receive **60.00**, allocating **40.00** to the invoice. Expect cash **60.00**, debt **60.00**, credit **20.00**. Allocate another **10.00** on the payment page: debt **50.00**, credit **10.00**, cash unchanged.
+3. Post an expense of **5.00** from the first cashbox with an active category and description. Cash becomes **55.00**. Open the expense to attach an optional private PDF/image receipt. Owner/Admin can configure categories.
+4. Transfer **10.00** to the second cashbox. Balances become **45.00** and **10.00**, combined **55.00**. Excessive transfers fail without saving either leg.
+5. Refund **20.00** from the first cashbox on the original payment page. It consumes **10.00** credit and releases **10.00** of allocations. Expect debt **60.00**, credit **0.00**, combined cash **35.00**. Original payment and refund/release histories remain. Further refunds cannot exceed the remaining original payment.
+6. Open the expense's posting and reverse it with a reason. The **5.00** outflow is offset, retaining the original. Combined cash becomes **40.00**. A second reversal is rejected. Payments use linked refunds.
+7. Open **Finance**, select a period covering these operations and all authorized scopes. Expect gross received **60.00**, refunds **20.00**, net collections **40.00**, net expenses **0.00**, current debt **60.00**, current cash **40.00**. Opening balances/transfers do not inflate collections. Invoice totals are separate from collected cash; no metric is accounting profit.
+8. Open **Reports**, run the ten reports and export CSV. Choose a customer for their statement. Date filters use the business timezone. Exports cap at 5,000 rows; narrow filters for larger results. Import decimal columns as text into spreadsheets to preserve large exact values.
+9. Test another business and an assigned-branch account in separate browser profiles. Branch Managers operate in assigned branches; Cashiers receive/allocate but cannot refund by default. Employees/Teachers have no finance access unless granted. Altering IDs, filters or cookies cannot authorize an operation.
+
+Details: [payments](docs/payments.md), [financial operations](docs/financial-operations.md), [dashboard/reports](docs/financial-reports.md), [verification](docs/verification.md). All calculations use PostgreSQL NUMERIC and exact string API amounts. Posting history is immutable; balances/debt derive from history. Server actions and database RPCs/RLS enforce tenant/branch permissions. Private receipts use Auth-based Storage policies; no service-role credential reaches the browser.

@@ -1,6 +1,6 @@
 # Invoices and receivables — Step 6B
 
-This increment adds invoice drafts, issue/void/discard operations, exact line items and discounts, customer receivables, debt aging, customer financial profiles and a browser print view. Payments, allocations, customer credit, partial settlement, refunds, expenses, transfers and financial exports remain later increments. There are no payment placeholders presented as real transactions or editable debt/balance fields.
+This document records the Step 6B invoice contract. Steps 6C–6E now extend it with real [payments/allocations](payments.md), [refunds/expenses/transfers/corrections](financial-operations.md) and [dashboard/reports](financial-reports.md). Paid/partial/overdue states derive from receivables; active allocations must be released before voiding. Earlier stage-specific limits below describe 6B; the linked documents define current workflows.
 
 ## Schema and lifecycle
 

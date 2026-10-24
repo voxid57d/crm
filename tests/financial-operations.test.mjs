@@ -358,4 +358,102 @@ test("expenses, transfers, refunds and reversible immutable history", async (t) 
       await as(1);
     },
   );
+  await t.test(
+    "refund cannot unwind a hidden branch allocation and rolls back atomically",
+    async () => {
+      const shared = (
+        await rows("select public.save_customer($1,null,$2,$3) id", [
+          tenant,
+          { first_name: "Shared refund customer", phone: "998900888" },
+          [branch, second],
+        ])
+      )[0].id;
+      const hiddenInvoice = (
+        await rows("select public.save_invoice_draft($1,null,$2,0,$3,$4) id", [
+          tenant,
+          randomUUID(),
+          {
+            branch_id: second,
+            customer_id: shared,
+            issue_date: today,
+            due_date: today,
+            discount_amount: "0",
+          },
+          [
+            {
+              description: "Hidden tuition",
+              quantity: "1",
+              unit_price: "100",
+              discount_amount: "0",
+            },
+          ],
+        ])
+      )[0].id;
+      await rows("select public.transition_invoice($1,$2,$3,1,'issue')", [
+        tenant,
+        hiddenInvoice,
+        randomUUID(),
+      ]);
+      const receipt = (
+        await rows("select public.post_payment($1,$2,$3,$4) id", [
+          tenant,
+          randomUUID(),
+          {
+            branch_id: branch,
+            customer_id: shared,
+            cashbox_id: cashbox,
+            amount: "50",
+            method: "cash",
+            paid_at: at,
+          },
+          [{ invoice_id: hiddenInvoice, amount: "40" }],
+        ])
+      )[0].id;
+      const before = await bal(cashbox);
+      await db.exec("reset role");
+      await rows(
+        "insert into public.business_role_permissions(tenant_id,role_id,permission) select $1,id,'payments.refund' from public.business_roles where tenant_id=$1 and system_key='manager'",
+        [tenant],
+      );
+      await as(3);
+      await assert.rejects(
+        rows("select public.post_payment_refund($1,$2,$3,$4,$5,$6,$7)", [
+          tenant,
+          receipt,
+          randomUUID(),
+          cashbox,
+          "20",
+          now(),
+          "Refund touches hidden invoice",
+        ]),
+        /allocation denied/,
+      );
+      assert.equal(await bal(cashbox), before);
+      const current = (
+        await rows("select public.payment_details($1,$2) v", [tenant, receipt])
+      )[0].v;
+      assert.equal(current.refunded, "0.00");
+      assert.equal(current.payment.credit, "10.00");
+      assert.equal(current.allocations.length, 0);
+      await rows("select public.post_payment_refund($1,$2,$3,$4,$5,$6,$7)", [
+        tenant,
+        receipt,
+        randomUUID(),
+        cashbox,
+        "5",
+        now(),
+        "Refund available credit only",
+      ]);
+      await as(1);
+      assert.equal(
+        (
+          await rows("select public.invoice_details($1,$2) v", [
+            tenant,
+            hiddenInvoice,
+          ])
+        )[0].v.outstanding,
+        "60.00",
+      );
+    },
+  );
 });

@@ -23,8 +23,8 @@ export default async function Debts({
       <p className="text-sm text-muted-foreground">
         Outstanding issued invoices in your authorized branches. Aging uses{" "}
         {workspace.tenant.timezone}. Each invoice belongs to one branch; shared
-        customers are counted once per invoice. Payments and allocations arrive
-        in Step 6C.
+        customers are counted once per invoice. Balances include allocations,
+        released allocations, invoice voids and refunds that reopen debt.
       </p>
       <InvoiceFilters workspace={workspace} filters={filters} debts />
       {workspace.permissions.has("debts.view") ? (

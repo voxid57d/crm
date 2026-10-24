@@ -109,6 +109,22 @@ test("local expense/transfer/refund forms, private receipts and posting races", 
       const page = await app.get(`/finance/expenses/${expense}`);
       assert.ok(page.html.includes("Download receipt"));
       assert.ok(page.html.includes(path.split("/").at(-1)));
+      const attached = await app.post(
+        `/finance/expenses/${expense}`,
+        "Attach receipt",
+        {
+          receipt: new File([bytes], "local-receipt.pdf", {
+            type: "application/pdf",
+          }),
+          confirm_finance: "on",
+        },
+      );
+      assert.equal(attached.response.status, 303, attached.html.slice(0, 500));
+      const files = await owner.client.storage
+        .from("finance-receipts")
+        .list(`${tenant}/expenses/${expense}`);
+      assert.ifError(files.error);
+      assert.equal(files.data.length, 2);
     },
   );
   await t.test(
@@ -272,6 +288,48 @@ test("local expense/transfer/refund forms, private receipts and posting races", 
           })
         ).error,
       );
+    },
+  );
+  await t.test(
+    "concurrent refunds cannot exceed the original payment",
+    async () => {
+      const c = await rpc(owner, "save_customer", {
+        p_tenant: tenant,
+        p_id: null,
+        p_profile: { first_name: "Concurrent refund", phone: "998902002" },
+        p_branches: [branch],
+      });
+      const p = await rpc(owner, "post_payment", {
+        p_tenant: tenant,
+        p_request: randomUUID(),
+        p_data: {
+          branch_id: branch,
+          customer_id: c,
+          cashbox_id: source,
+          amount: "100",
+          method: "cash",
+          paid_at: new Date(Date.now() - 60000).toISOString(),
+        },
+      });
+      const command = () =>
+        owner.client.rpc("post_payment_refund", {
+          p_tenant: tenant,
+          p_payment: p,
+          p_request: randomUUID(),
+          p_cashbox: source,
+          p_amount: "60",
+          p_at: new Date().toISOString(),
+          p_reason: "Concurrent customer refund",
+        });
+      const r = await Promise.all([command(), command()]);
+      assert.equal(r.filter((v) => !v.error).length, 1);
+      const d = await rpc(owner, "payment_details", {
+        p_tenant: tenant,
+        p_payment: p,
+      });
+      assert.equal(d.refunded, "60.00");
+      assert.equal(d.refundable, "40.00");
+      assert.equal(d.payment.credit, "40.00");
     },
   );
 });

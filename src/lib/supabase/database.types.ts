@@ -2672,6 +2672,10 @@ export type Database = {
         };
         Returns: Json;
       };
+      financial_dashboard: {
+        Args: { p_filters?: Json; p_tenant: string };
+        Returns: Json;
+      };
       financial_operation_details: {
         Args: { p_id: string; p_kind: string; p_tenant: string };
         Returns: Json;
@@ -2683,6 +2687,23 @@ export type Database = {
           p_page?: number;
           p_tenant: string;
         };
+        Returns: Json;
+      };
+      financial_report: {
+        Args: {
+          p_filters?: Json;
+          p_page?: number;
+          p_report: string;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      financial_report_export: {
+        Args: { p_filters?: Json; p_report: string; p_tenant: string };
+        Returns: Json;
+      };
+      financial_report_options: {
+        Args: { p_filters?: Json; p_tenant: string };
         Returns: Json;
       };
       financial_transaction_details: {

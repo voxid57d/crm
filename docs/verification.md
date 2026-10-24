@@ -1,4 +1,29 @@
-﻿# Verification record — 23 October 2026 (through Step 6B)
+﻿# Verification record — 24 October 2026 (through Step 6E)
+
+## Steps 6C–6E: current verification
+
+Completed against local Supabase and the existing Next.js server at `http://127.0.0.1:3000`. No dependency installation, hosted connection, reset or deletion of existing business data was performed. Additive migrations preserve populated cash/invoice/audit history. Local Git checkpoints separate 6C and 6D; the final checkpoint includes reporting/documentation. No remote push or deployment is implied.
+
+| Check                      | Result                                                                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `npm run check`            | Passed: ESLint, strict TypeScript, **153 portable tests**, optimized production build                         |
+| `npm run test:integration` | **55 tests passed across 8 suites**, using real local Auth/PostgREST/Storage and rendered server-action forms |
+| `npm run db:test`          | **137 assertions passed across 10 native pgTAP suites**, fixtures rolled back                                 |
+| `npm run db:lint`          | No new issues; one pre-existing unused variable `m` warning in `public.save_employee`                         |
+| Route smoke                | **64 protected routes** passed, including finance/export; public/home/platform/callback boundaries passed     |
+| Formatting/whitespace      | Prettier and Git diff whitespace checks passed                                                                |
+
+6C tests cover receipt, initial multi-invoice/later allocation, partial/full settlement and derived states, credit/release history, invoice void guard, retries, rollback, concurrent allocation limits, foreign/form-ID tampering, narrow cashier access and immutable sources.
+
+6D tests cover expenses, private receipts through Storage and rendered upload forms, overwrite/foreign upload/download denial, exact balanced transfers and concurrent insufficient-funds rejection, partial/full refunds with allocation releases and reopened debt, concurrent refund caps, reversals and duplicate rejection, owner-only overdraft configuration and immutable history. A refund requiring access to a hidden branch allocation rolls back completely; visible credit can still be refunded without revealing hidden invoice details.
+
+6E tests reconcile receipts/refunds/allocations/expense reversals/transfers with dashboard/report results, distinguish historical expense periods from current debt/balance snapshots, execute all ten report queries/rendered pages, check business-local presets/source filters, preserve amounts beyond JavaScript's safe integer range, enforce the 5,000-row export bound, escape CSV formulas, and reject foreign/forged branch/employee/subjectless reads/exports. Existing Auth, employee/customer/student/sales/cashbox/invoice suites remain passing. No runtime frontend mock data is substituted.
+
+Native fixtures roll back; live tests retain isolated local test accounts/businesses/files. `.env.local` stays ignored; only the template is tracked. No service-role browser client was introduced.
+
+Remaining unverified: browser visual/mobile layout, keyboard/focus, native confirmation dialogs, earlier sales pointer dragging, invoice print/PDF pagination, password-recovery email-link redemption, production deployment and production-size load testing. Local SSR rendering, server forms, authorization and persistence are tested separately. Excel/PDF financial exports, gateways, payroll payouts/calculation, statutory accounting and LMS billing are outside this phase.
+
+See [payments](payments.md), [financial operations](financial-operations.md), [financial reports](financial-reports.md), and the [README walkthrough](../README.md#test-complete-financial-workflows-steps-6c6e).
 
 ## Step 5 baseline and environment (historical)
 

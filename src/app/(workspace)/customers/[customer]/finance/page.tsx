@@ -59,6 +59,15 @@ export default async function CustomerFinances({
           </Button>
         )}
       </div>
+      {workspace.permissions.has("finance.reports.view") && (
+        <Button asChild variant="outline">
+          <Link
+            href={`/finance/reports?${new URLSearchParams({ report: "customer_statement", customer: id, ...(branch ? { branch } : {}) })}`}
+          >
+            Customer financial statement
+          </Link>
+        </Button>
+      )}
       <p className="text-sm text-muted-foreground">
         Only invoices in branches where you can view invoices and receivables
         are included. Each invoice is counted once. Archived contacts retain
