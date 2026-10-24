@@ -6,7 +6,8 @@ export async function CustomerFinanceCard({
 }: {
   customerId: string;
 }) {
-  const { summary } = await customerFinance(customerId);
+  const { summary, can_view_payments, payment_summary } =
+    await customerFinance(customerId);
   return (
     <section id="finance" className="space-y-3 rounded-xl border bg-white p-5">
       <h2 className="font-semibold">Invoices and receivables</h2>
@@ -23,6 +24,12 @@ export async function CustomerFinanceCard({
           {formatMoney(summary.overdue)}
         </dd>
       </dl>
+      {can_view_payments && (
+        <p className="text-sm">
+          Available payment credit:{" "}
+          <strong>{formatMoney(payment_summary.credit)}</strong>
+        </p>
+      )}
       <Link
         className="inline-block text-sm text-primary underline"
         href={`/customers/${customerId}/finance`}
@@ -30,7 +37,7 @@ export async function CustomerFinanceCard({
         View customer finances
       </Link>
       <p className="text-xs text-muted-foreground">
-        Payment and credit workflows arrive in Step 6C.
+        Totals include only your authorized invoices and payments.
       </p>
     </section>
   );

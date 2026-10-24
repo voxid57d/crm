@@ -5,6 +5,7 @@ import { getWorkspace } from "@/features/workspace/context";
 import { uuid } from "@/lib/validation.mjs";
 import { financeFilters, pageNumber } from "./queries";
 import type { FinanceSearch } from "./types";
+import type { PaymentRow } from "./operations-types";
 import type {
   InvoiceDetail,
   InvoiceRow,
@@ -134,6 +135,9 @@ export async function customerFinance(
       summary: DebtSummary;
       total: number;
       rows: InvoiceRow[];
+      can_view_payments: boolean;
+      payments: { rows: PaymentRow[]; total: number };
+      payment_summary: { received: string; allocated: string; credit: string };
     }),
   };
 }

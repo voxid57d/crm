@@ -34,6 +34,12 @@ export default function FinanceLayout({
         >
           Receivables
         </Link>
+        <Link
+          className="text-primary underline underline-offset-4"
+          href="/finance/payments"
+        >
+          Payments
+        </Link>
       </nav>
       {children}
     </div>

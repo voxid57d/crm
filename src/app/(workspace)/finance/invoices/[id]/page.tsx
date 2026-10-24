@@ -153,6 +153,17 @@ export default async function InvoiceProfile({
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
+          {h.state === "issued" &&
+            detail.outstanding !== "0.00" &&
+            workspace.branchPermissions
+              .get(h.branch_id)
+              ?.has("payments.create") && (
+              <Button asChild>
+                <Link href={`/finance/payments/new?invoice=${id}`}>
+                  Record payment for invoice
+                </Link>
+              </Button>
+            )}
           <Button asChild variant="outline">
             <Link href={`${path}/print`}>Print / Save PDF</Link>
           </Button>
@@ -233,7 +244,7 @@ export default async function InvoiceProfile({
         <h2 className="text-xl font-semibold">Receivable history</h2>
         <p className="text-sm text-muted-foreground">
           These entries track billed debt and void offsets. They do not move
-          cash. Payment and credit history will be added in Step 6C.
+          cash. Allocations and releases change debt without posting cash again.
         </p>
         {detail.receivables.length ? (
           <ul className="divide-y rounded-xl border bg-white">
@@ -243,8 +254,13 @@ export default async function InvoiceProfile({
                 key={e.id}
               >
                 <span>
-                  {e.kind === "issue" ? "Issued charge" : "Void offset"} ·{" "}
-                  {financeDate(e.created_at, workspace.tenant.timezone)}
+                  {{
+                    issue: "Issued charge",
+                    void: "Void offset",
+                    allocation: "Payment allocation",
+                    allocation_release: "Allocation released",
+                  }[e.kind] ?? e.kind}{" "}
+                  · {financeDate(e.created_at, workspace.tenant.timezone)}
                 </span>
                 <span className="font-medium tabular-nums">
                   {formatMoney(e.amount, h.currency)}

@@ -11,6 +11,8 @@ import { InvoiceTable } from "@/components/finance/invoice-table";
 import { FinancePagination } from "@/components/finance/pagination";
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/forms/field";
+import { PaymentTable } from "@/components/finance/payment-table";
+import { formatMoney } from "@/features/finance/money.mjs";
 export const metadata = { title: "Customer finances" };
 export default async function CustomerFinances({
   params,
@@ -60,8 +62,8 @@ export default async function CustomerFinances({
       <p className="text-sm text-muted-foreground">
         Only invoices in branches where you can view invoices and receivables
         are included. Each invoice is counted once. Archived contacts retain
-        financial history. Payments, allocations and credit are not implemented
-        in this increment.
+        financial history. Payment credit is shown only for payments you can
+        access.
       </p>
       <form className="flex flex-wrap items-end gap-4 rounded-xl border bg-white p-5">
         <SelectField label="Invoice branch" name="branch" defaultValue={branch}>
@@ -82,6 +84,26 @@ export default async function CustomerFinances({
         unpaid due date: {data.summary.next_due_date ?? "None"}
       </p>
       <InvoiceTable rows={data.rows} />
+      {data.can_view_payments && (
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold">Payment history and credit</h2>
+          <p className="text-sm">
+            Available credit:{" "}
+            <strong>{formatMoney(data.payment_summary.credit)}</strong> · Net
+            allocated: {formatMoney(data.payment_summary.allocated)}
+          </p>
+          <PaymentTable
+            rows={data.payments.rows}
+            zone={workspace.tenant.timezone}
+          />
+          <Link
+            className="text-primary underline"
+            href={`/finance/payments?${new URLSearchParams({ customer: id, branch: branch || "" })}`}
+          >
+            All authorized customer payments
+          </Link>
+        </section>
+      )}
       <FinancePagination
         path={`/customers/${id}/finance`}
         filters={branch ? { branch } : {}}

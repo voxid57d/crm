@@ -1,0 +1,13 @@
+# Payments and customer credit (6C)
+
+Payments are real local Supabase records. Receiving funds posts one immutable positive cashbox movement. Allocations reduce issued invoice receivables without posting cash again. Unallocated funds remain customer credit. Releasing an allocation requires its original allocation, remaining amount and a reason; it restores credit and reopens debt. An allocated invoice cannot be voided until its allocations are released.
+
+Use Finance → Payments → Receive payment. Choose an authorized branch, customer and same-branch or business-wide cashbox, enter a positive UZS decimal amount, effective date/time, method and optional reference. You can allocate across several issued invoices initially or allocate remaining credit on the payment page later. Dates use the business timezone; future dates are rejected. Amounts stay decimal strings from forms through database responses.
+
+Database commands serialize financial requests within a business and lock affected records. Retrying the same request with the same canonical payload returns the original result; changed payloads are rejected. Failed multi-invoice commands roll back cash, debt and audit together. New form loads create new request keys: inspect history before recording a second real-world receipt.
+
+`payments`, `payment_allocations` and their cash/receivable/audit records are immutable. RLS, composite tenant/customer/currency foreign keys, deferred consistency checks and checked RPCs enforce authorization and accounting. Direct monetary table access is revoked. Payment view/create/allocate and cashbox access are checked in their actual scopes; invoice allocation also requires permission for the invoice branch. Cashiers can receive a shared customer's payment in an assigned branch without receiving full CRM access to that customer's other branches. Hidden invoice allocation details remain hidden; the payment's credit remains accurate.
+
+Owner/Admin receive business-wide access. Manager/Cashier receive payment view/create/allocate in assigned branches. Employees receive none by default. Custom roles use the existing permission engine. Customer finance pages include authorized received, allocated and credit totals and payment history.
+
+Verification: `node --test tests/payments.test.mjs`, `npm run db:test`, and `node --env-file=.env.local --test tests/integration/payments.test.mjs`. Live tests use actual local Auth, PostgREST and rendered server-action forms, including concurrent allocations and cross-tenant attempts. No hosted database, service-role browser credential or online payment gateway is used.

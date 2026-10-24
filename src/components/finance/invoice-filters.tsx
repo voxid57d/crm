@@ -47,7 +47,15 @@ export function InvoiceFilters({
             defaultValue={filters.status ?? ""}
           >
             <option value="">All statuses</option>
-            {["draft", "issued", "overdue", "voided", "discarded"].map((s) => (
+            {[
+              "draft",
+              "issued",
+              "partially_paid",
+              "paid",
+              "overdue",
+              "voided",
+              "discarded",
+            ].map((s) => (
               <option key={s} value={s}>
                 {s}
               </option>

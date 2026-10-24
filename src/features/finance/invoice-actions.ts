@@ -150,7 +150,7 @@ export async function transitionInvoice(
         error:
           r.error.code === "40001"
             ? "Invoice changed. Reload before continuing."
-            : "Invoice action rejected. Check its current state, active customer/branch, issue date, positive total and your permissions.",
+            : "Invoice action rejected. Check state, active customer/branch, date, positive total and permissions. Release active allocations before voiding.",
       };
   } catch (e) {
     return fail(e);
