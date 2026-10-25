@@ -12,6 +12,7 @@ import { InvoiceDocument } from "@/components/finance/invoice-document";
 import { FinancePagination } from "@/components/finance/pagination";
 import { formatMoney } from "@/features/finance/money.mjs";
 import type { Json } from "@/lib/supabase/database.types";
+import { invoiceEnrollmentSource } from "@/features/academics/integration-queries";
 export const metadata = { title: "Invoice details" };
 const eventLabels: Record<string, string> = {
   invoice_created: "Draft created",
@@ -135,6 +136,7 @@ export default async function InvoiceProfile({
   const { workspace, detail } = await getInvoice(id, auditPage),
     h = detail.invoice,
     path = `/finance/invoices/${id}`;
+  const source = await invoiceEnrollmentSource(id);
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -184,6 +186,19 @@ export default async function InvoiceProfile({
         </p>
       )}
       <InvoiceDocument detail={detail} />
+      {source && (
+        <p className="rounded-lg border bg-white p-4 text-sm">
+          Academic source:{" "}
+          <Link
+            className="text-primary underline"
+            href={`/enrollments/${source.enrollment_id}`}
+          >
+            {source.group_name} enrollment
+          </Link>
+          . The retained link fixes this invoice&apos;s student contact and
+          branch.
+        </p>
+      )}
       <div className="flex flex-wrap gap-4 text-sm text-primary">
         {detail.customer_visible && (
           <Link className="underline" href={`/customers/${h.customer_id}`}>

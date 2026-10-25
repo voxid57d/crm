@@ -10,6 +10,8 @@ export function LessonList({
   path = "/lessons",
   filters,
   zone,
+  pageKey = "page",
+  anchor = "",
 }: {
   rows: LessonRow[];
   total: number;
@@ -17,6 +19,8 @@ export function LessonList({
   path?: string;
   filters: Record<string, string>;
   zone: string;
+  pageKey?: string;
+  anchor?: string;
 }) {
   return (
     <div className="space-y-4">
@@ -94,7 +98,14 @@ export function LessonList({
           </tbody>
         </table>
       </div>
-      <Pagination path={path} filters={filters} page={page} total={total} />
+      <Pagination
+        path={path}
+        filters={filters}
+        page={page}
+        total={total}
+        pageKey={pageKey}
+        anchor={anchor}
+      />
     </div>
   );
 }

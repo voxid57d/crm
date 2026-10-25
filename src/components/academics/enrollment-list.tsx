@@ -11,7 +11,7 @@ export function EnrollmentList({
   filters = {},
   pageKey = "page",
 }: {
-  rows: EnrollmentRow[];
+  rows: (EnrollmentRow & { group_status?: string; teachers?: string })[];
   total: number;
   page: number;
   path: string;
@@ -70,6 +70,12 @@ export function EnrollmentList({
                   <p className="mt-1 text-xs text-muted-foreground">
                     {e.course_name}
                   </p>
+                  {e.group_status && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Group: {e.group_status} ·{" "}
+                      {e.teachers || "No assigned teacher"}
+                    </p>
+                  )}
                 </td>
                 <td className="p-4">{e.branch_name}</td>
                 <td className="p-4">

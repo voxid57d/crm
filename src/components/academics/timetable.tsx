@@ -94,14 +94,16 @@ export function CalendarPagination({
   page,
   total,
   size,
+  path = "/timetable",
 }: {
   filters: Record<string, string>;
   page: number;
   total: number;
   size: number;
+  path?: string;
 }) {
   const href = (p: number) =>
-    "/timetable?" + new URLSearchParams({ ...filters, page: String(p) });
+    path + "?" + new URLSearchParams({ ...filters, page: String(p) });
   return (
     <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
       <p>

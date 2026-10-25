@@ -28,6 +28,7 @@ const groups = [
   {
     label: "LEARNING",
     links: [
+      { href: "/academics", label: "Academic overview", icon: BarChart3 },
       { href: "/students", label: "Students", icon: GraduationCap },
       { href: "/courses", label: "Courses", icon: BookOpen },
       { href: "/groups", label: "Groups", icon: Users },

@@ -30,6 +30,8 @@ function version(form: FormData) {
 function refresh() {
   revalidatePath("/finance", "layout");
   revalidatePath("/customers", "layout");
+  revalidatePath("/students", "layout");
+  revalidatePath("/enrollments", "layout");
 }
 export async function saveInvoiceDraft(
   _state: ActionState,

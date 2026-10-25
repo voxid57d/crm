@@ -52,6 +52,8 @@ function whole(form: FormData, name: string, max: number, optional = false) {
 function refresh() {
   revalidatePath("/courses", "layout");
   revalidatePath("/classrooms", "layout");
+  for (const path of ["/academics", "/students", "/customers"])
+    revalidatePath(path, "layout");
 }
 export async function saveCourse(
   _state: ActionState,

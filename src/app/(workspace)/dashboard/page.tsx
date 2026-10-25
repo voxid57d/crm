@@ -81,6 +81,12 @@ export default async function DashboardPage() {
           </Card>
         ))}
       </div>
+      {(permissions.has("groups.view") ||
+        permissions.has("groups.view_assigned")) && (
+        <Button asChild variant="outline">
+          <Link href="/academics">Open academic overview and reports</Link>
+        </Button>
+      )}
       <div className="grid gap-5 md:grid-cols-2">
         <Card className="shadow-none">
           <CardHeader>

@@ -16,6 +16,8 @@ import {
 import { CustomerFinanceCard } from "@/components/finance/customer-finance-card";
 import { ContactFinances } from "@/components/finance/contact-finances";
 import { StudentEnrollments } from "@/components/academics/student-enrollments";
+import { StudentLearning } from "@/components/academics/student-learning";
+import { enrollmentStatus } from "@/features/academics/integration-queries";
 
 function NoteKind({ value = "note" }: { value?: string }) {
   return (
@@ -38,6 +40,13 @@ export type ProfileSearch = {
   payment_page?: string;
   refund_page?: string;
   enrollment_page?: string;
+  enrollment_status?: string;
+  lesson_from?: string;
+  lesson_to?: string;
+  lesson_status?: string;
+  lesson_page?: string;
+  academic_page?: string;
+  academic_invoice_page?: string;
 };
 export async function ContactProfile({
   id,
@@ -245,13 +254,23 @@ export async function ContactProfile({
           ...(student ? ["education", "guardians"] : []),
           "finance",
           "learning",
+          ...(student
+            ? [
+                "lessons",
+                "enrollment-charges",
+                "academic-activity",
+                "attendance",
+              ]
+            : []),
         ].map((section) => (
           <a
             key={section}
             href={`#${section}`}
             className="capitalize underline"
           >
-            {section === "learning" ? "Courses & lessons" : section}
+            {section === "learning"
+              ? "Courses & groups"
+              : section.replaceAll("-", " ")}
           </a>
         ))}
       </nav>
@@ -312,8 +331,8 @@ export async function ContactProfile({
               ))}
             </dl>
             <p className="mt-4 text-xs text-muted-foreground">
-              Course enrollment and academic progress will be added with the LMS
-              module.
+              Courses, enrollment history and lessons use this same Student
+              Profile.
             </p>
           </section>
           <Guardians
@@ -493,11 +512,19 @@ export async function ContactProfile({
           </section>
         )}
         {student ? (
-          <StudentEnrollments
-            studentId={id}
-            path={`${base}/${id}`}
-            page={page(filters.enrollment_page)}
-          />
+          <>
+            <StudentEnrollments
+              studentId={id}
+              path={`${base}/${id}`}
+              page={page(filters.enrollment_page)}
+              status={enrollmentStatus(filters)}
+            />
+            <StudentLearning
+              student={id}
+              path={`${base}/${id}`}
+              search={filters}
+            />
+          </>
         ) : (
           <section id="learning" className="rounded-xl border bg-white p-5">
             <h2 className="font-semibold">
@@ -505,8 +532,8 @@ export async function ContactProfile({
             </h2>
             <p className="mt-3 text-sm text-muted-foreground">
               Add a Student Profile through the existing Add Student workflow to
-              use academic enrollment. Lessons and attendance follow in later
-              increments.
+              use groups, enrollments and lessons. Attendance is planned for
+              Step 8.
             </p>
           </section>
         )}

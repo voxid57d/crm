@@ -19,6 +19,9 @@ for (const [route, content] of publicRoutes) {
   console.log("PASS public " + route);
 }
 const protectedRoutes = [
+  "/academics",
+  "/students/00000000-0000-0000-0000-000000000001/timetable",
+  "/enrollments/00000000-0000-0000-0000-000000000001/invoice",
   "/dashboard",
   "/businesses",
   "/businesses/new",

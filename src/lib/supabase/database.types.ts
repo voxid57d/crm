@@ -1236,6 +1236,55 @@ export type Database = {
           },
         ];
       };
+      enrollment_invoice_links: {
+        Row: {
+          branch_id: string;
+          created_at: string;
+          created_by: string;
+          customer_id: string;
+          enrollment_id: string;
+          invoice_id: string;
+          request_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          created_at?: string;
+          created_by: string;
+          customer_id: string;
+          enrollment_id: string;
+          invoice_id: string;
+          request_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          branch_id?: string;
+          created_at?: string;
+          created_by?: string;
+          customer_id?: string;
+          enrollment_id?: string;
+          invoice_id?: string;
+          request_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "enrollment_invoice_links_tenant_id_enrollment_id_customer__fkey";
+            columns: ["tenant_id", "enrollment_id", "customer_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "student_enrollments";
+            referencedColumns: ["tenant_id", "id", "customer_id", "branch_id"];
+          },
+          {
+            foreignKeyName: "enrollment_invoice_links_tenant_id_invoice_id_customer_id__fkey";
+            columns: ["tenant_id", "invoice_id", "customer_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "invoices";
+            referencedColumns: ["tenant_id", "id", "customer_id", "branch_id"];
+          },
+        ];
+      };
       expense_categories: {
         Row: {
           id: string;
@@ -3632,6 +3681,11 @@ export type Database = {
         };
         Returns: Json;
       };
+      academic_overview: {
+        Args: { p_filters: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
+      academic_report_options: { Args: { p_tenant: string }; Returns: Json };
       accept_employee_invitation: {
         Args: { p_token: string };
         Returns: string;
@@ -3770,6 +3824,18 @@ export type Database = {
         Args: { p_employee: string; p_role: string; p_tenant: string };
         Returns: string;
       };
+      create_enrollment_invoice_draft: {
+        Args: {
+          p_description: string;
+          p_due_date: string;
+          p_enrollment: string;
+          p_issue_date: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
       create_student_enrollment: {
         Args: {
           p_add_branch?: boolean;
@@ -3868,6 +3934,10 @@ export type Database = {
           p_version: number;
         };
         Returns: string;
+      };
+      enrollment_billing_details: {
+        Args: { p_enrollment: string; p_page?: number; p_tenant: string };
+        Returns: Json;
       };
       enrollment_directory: {
         Args: { p_filters?: Json; p_page?: number; p_tenant: string };
@@ -3993,6 +4063,10 @@ export type Database = {
       };
       invoice_directory: {
         Args: { p_filters?: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
+      invoice_enrollment_source: {
+        Args: { p_invoice: string; p_tenant: string };
         Returns: Json;
       };
       lead_directory: {
@@ -4469,10 +4543,38 @@ export type Database = {
         };
         Returns: string;
       };
+      student_academic_summary: {
+        Args: {
+          p_invoice_page?: number;
+          p_page?: number;
+          p_student: string;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
       student_enrollment_details: {
         Args: {
           p_enrollment: string;
           p_history_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      student_enrollment_directory: {
+        Args: {
+          p_page?: number;
+          p_status?: string;
+          p_student: string;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      student_lesson_directory: {
+        Args: {
+          p_calendar?: boolean;
+          p_filters?: Json;
+          p_page?: number;
+          p_student: string;
           p_tenant: string;
         };
         Returns: Json;

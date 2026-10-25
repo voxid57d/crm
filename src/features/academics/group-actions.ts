@@ -78,7 +78,14 @@ function agreement(f: FormData, transfer = false) {
   };
 }
 function refresh() {
-  for (const path of ["/groups", "/enrollments", "/students", "/courses"])
+  for (const path of [
+    "/groups",
+    "/enrollments",
+    "/students",
+    "/courses",
+    "/academics",
+    "/customers",
+  ])
     revalidatePath(path, "layout");
 }
 export async function saveGroup(

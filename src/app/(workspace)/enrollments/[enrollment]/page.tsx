@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EnrollmentUpdateForm } from "@/components/academics/delivery-forms";
 import { AcademicHistoryPanel } from "@/components/academics/history";
+import { EnrollmentBillingPanel } from "@/components/academics/enrollment-billing";
 export const metadata = { title: "Enrollment details" };
 export default async function EnrollmentProfile({
   params,
@@ -124,6 +125,10 @@ export default async function EnrollmentProfile({
           canWithdraw={d.can_withdraw}
         />
       )}{" "}
+      <EnrollmentBillingPanel
+        id={id}
+        page={academicPage(search, "invoice_page")}
+      />
       {d.history.total > 0 && (
         <AcademicHistoryPanel
           title="Enrollment history"

@@ -1,6 +1,36 @@
-# Verification record — 25 October 2026 (through Step 7C)
+# Verification record — 26 October 2026 (through Step 7D)
 
-## Step 7C: current verification
+## Step 7D: current verification
+
+Baseline commit `ebdca8f` was clean. Inspected original contact/Profile/guardian relationships, group/enrollment/teacher permissions, lesson membership and frozen roster behavior, invoice commands and exact-decimal data, server components, migrations and existing tests. Installed Next.js Server Actions and data-security guides were read before coding. All **211 baseline portable tests** passed; local Supabase health responded on 54321, and the stopped Next.js server was started on 3000. No new dependency, environment variable, production credential, hosted connection, database reset, remote push or deployment was introduced.
+
+| Check                      | Actual result                                                                               |
+| -------------------------- | ------------------------------------------------------------------------------------------- |
+| `npm run check`            | Passed: ESLint, strict TypeScript, **225 portable tests**, optimized local production build |
+| New live integration suite | **10 tests passed**, real local Auth/PostgREST and rendered Next.js forms                   |
+| Full live regression suite | **108 tests passed across 13 parent suites**, real local Auth/API and rendered forms        |
+| `npm run db:test`          | **260 assertions passed across 15 native PostgreSQL suites**, SQL fixtures rolled back      |
+| `npm run test:smoke`       | **100 protected routes passed**, plus public/home/platform/callback boundaries              |
+| `npm run db:lint`          | No new issues; existing unused variable `m` in `public.save_employee` remains               |
+| Migrations/types           | Three additive 7D migrations applied locally; actual database types regenerated             |
+
+Final follow-up ESLint, strict TypeScript and production build also passed after adding refreshes for the connected student/report/invoice pages. Whole-project Prettier and Git whitespace checks passed. Final test runs have zero failures.
+
+The [7D guide](lms-integrations.md) documents source identity, schema, permission checks, counting definitions, exact invoice semantics and manual testing. The only new table is the RLS-protected, immutable enrollment/invoice link. Composite foreign keys fix tenant/student contact/branch across the link; the existing finance service creates the draft and owns its financial audit. No new balance, debt, payment or teacher/student identity system was added.
+
+Portable tests execute actual migration SQL and verify distinct active students versus enrollment counts, pending/active/paused seat reservation, branch/course/teacher/date/capacity filters, group status/current teacher enrichment, original Student Profile lesson membership, completed/cancelled lessons and minimal activity history. They verify exact amounts beyond JavaScript's safe integer range, actor/payload-bound draft retries, stale versions, same-contact draft review and rejection of linked debtor/branch moves, invoice link immutability/direct-write denial, Teacher financial redaction, assigned-only reports, Manager branch and whole-profile restrictions, foreign/subjectless/anonymous denial and tampered IDs. Captured expected membership survives withdrawal; future lessons outside effective dates disappear. Student lesson/invoice/activity and report pagination are exercised beyond 20 rows; invalid calendar ranges fail. Catalog edits leave original agreements/drafts unchanged, and only existing explicit issue commands post receivables.
+
+The populated upgrade fixture runs separately for 7A, 7B, 7C and 7D. The 7D boundary includes a pre-existing group, enrollment and scheduled lesson. Original contact/guardian/conversion/salary and posted financial record hashes, academic rows and financial debt/credit remain unchanged after migrations and read integrations.
+
+Native PostgreSQL independently verifies RLS/grants, report/student identity counts, real invited teacher access, exact-decimal creation through the finance service, request replay, retained source links, original debtor, no automatic issue/debt, Teacher and foreign financial redaction, denied forged IDs/direct deletes/subjectless requests and zero hidden receivable entries. Deferred constraints were forced immediate. The new native file adds 28 assertions.
+
+New live tests exercise the actual dashboard/report filters, unified profile and guardian/financial links, day/week/month student timetables, completed/cancelled filters and rendered draft form (including required confirmation). Three concurrent identical invoice requests produce one draft; linked debtor edits fail atomically. A Teacher submits a real Owner form action reference with Teacher cookies and gains no invoice. Managers/Employees/foreign businesses and edited IDs stay restricted. An original issued invoice of 100.00, payment of 60.10 allocated 40.00, outstanding 60.00 and available credit 20.10 survive scheduling, draft creation and withdrawal unchanged. Guardians retain their original identities. Drafts change the document list without changing posted balances.
+
+Development-only fixture corrections aligned named arguments/statuses with the existing RPC contracts. A student-profile test was narrowed to its lesson section because the independent activity feed correctly also links future lesson events. No authorization was weakened. The current payment architecture has descriptive notes/references but no normalized separate payer identity; this limitation and guardian-as-debtor billing are explicitly documented and displayed.
+
+Remaining manual/unverified work: desktop/mobile visual layout, keyboard/focus, browser-native confirmations, earlier password-recovery link redemption, sales drag interactions, invoice/report print layout and production-size load. Student rosters are expected membership, not attendance or a full historical pause reconstruction. Operational metrics use current statuses with effective-date overlap, not historical state snapshots. No attendance marking, automatic/recurring billing, guardian-as-debtor relationship, normalized third-party payer, payroll, parent/student portal or deployment is claimed. Steps 7A?7D complete the authorized core LMS; Step 8 requires its next scoped instruction.
+
+## Step 7C: historical verification
 
 Baseline `1ee517c` was clean. Inspected group/teacher/enrollment identities, effective periods and role helpers; local UI/time functions; migrations/RLS; existing tests and installed Next.js Server Actions/data-security guides before writing code. Baseline strict TypeScript and all 194 portable tests passed. Local app/Auth health checks responded on ports 3000/54321 and existing services/data were reused. No dependency installation, environment variable, hosted connection, reset, production deployment or remote push was introduced. The [scheduling guide](lms-scheduling.md) records the schema, timezone/conflict/lifecycle decisions and manual walkthrough.
 

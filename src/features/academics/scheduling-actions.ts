@@ -92,7 +92,15 @@ function lessonData(f: FormData) {
   };
 }
 function refresh() {
-  for (const path of ["/groups", "/lessons", "/timetable", "/classrooms"])
+  for (const path of [
+    "/groups",
+    "/lessons",
+    "/timetable",
+    "/classrooms",
+    "/academics",
+    "/students",
+    "/customers",
+  ])
     revalidatePath(path, "layout");
 }
 export async function saveSchedule(
