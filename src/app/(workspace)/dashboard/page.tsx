@@ -144,7 +144,8 @@ export default async function DashboardPage() {
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Student profiles, courses, classrooms, groups and enrollments are
-          available. Schedules, lessons and attendance workflows will follow.
+          available, along with weekly schedules, lessons and timetable.
+          Attendance will follow.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {modules.slice(0, 4).map((entry) => (
@@ -155,7 +156,9 @@ export default async function DashboardPage() {
                   ? "/students"
                   : entry.slug === "courses"
                     ? "/courses"
-                    : "/modules/" + entry.slug
+                    : entry.slug === "schedule"
+                      ? "/timetable"
+                      : "/modules/" + entry.slug
               }
               className="rounded-xl border bg-white p-5 hover:border-primary/40"
             >
@@ -168,7 +171,9 @@ export default async function DashboardPage() {
                   ? "Open students"
                   : entry.slug === "courses"
                     ? "Open courses"
-                    : "Planned module"}
+                    : entry.slug === "schedule"
+                      ? "Open timetable"
+                      : "Planned module"}
               </span>
             </Link>
           ))}

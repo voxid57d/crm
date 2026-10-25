@@ -17,6 +17,8 @@ type IdFunction =
   | "save_course"
   | "save_course_setting"
   | "save_study_group"
+  | "save_group_schedule"
+  | "save_lesson"
   | "save_classroom";
 type NullableId<K extends IdFunction> = Omit<Functions[K], "Args"> & {
   Args: Omit<Functions[K]["Args"], "p_id"> & { p_id: string | null };

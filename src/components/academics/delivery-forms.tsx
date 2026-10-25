@@ -131,8 +131,8 @@ export function GroupForm({
       </div>
       <p className="text-sm text-muted-foreground">
         Pending, active and paused enrollments reserve seats. Classroom capacity
-        must cover the group. Weekly schedules and lesson conflicts will be
-        added in Step 7C.
+        must cover the group. Save the group, then add weekly schedules or
+        individual lessons and review resource availability.
       </p>
     </ActionForm>
   );

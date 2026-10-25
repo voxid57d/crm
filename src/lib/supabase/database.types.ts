@@ -1607,6 +1607,138 @@ export type Database = {
           },
         ];
       };
+      group_schedule_series: {
+        Row: {
+          branch_id: string;
+          created_at: string;
+          created_by: string;
+          group_id: string;
+          id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          created_at?: string;
+          created_by: string;
+          group_id: string;
+          id?: string;
+          tenant_id: string;
+        };
+        Update: {
+          branch_id?: string;
+          created_at?: string;
+          created_by?: string;
+          group_id?: string;
+          id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "group_schedule_series_tenant_id_group_id_branch_id_fkey";
+            columns: ["tenant_id", "group_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "study_groups";
+            referencedColumns: ["tenant_id", "id", "branch_id"];
+          },
+        ];
+      };
+      group_schedule_slots: {
+        Row: {
+          branch_id: string;
+          classroom_id: string | null;
+          created_at: string;
+          created_by: string;
+          effective_from: string;
+          effective_to: string;
+          end_time: string;
+          group_id: string;
+          id: string;
+          is_active: boolean;
+          replaces_id: string | null;
+          series_id: string;
+          start_time: string;
+          teacher_id: string;
+          tenant_id: string;
+          timezone: string;
+          updated_at: string;
+          version: number;
+          weekday: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          classroom_id?: string | null;
+          created_at?: string;
+          created_by: string;
+          effective_from: string;
+          effective_to: string;
+          end_time: string;
+          group_id: string;
+          id?: string;
+          is_active?: boolean;
+          replaces_id?: string | null;
+          series_id: string;
+          start_time: string;
+          teacher_id: string;
+          tenant_id: string;
+          timezone: string;
+          updated_at?: string;
+          version?: number;
+          weekday: number;
+        };
+        Update: {
+          branch_id?: string;
+          classroom_id?: string | null;
+          created_at?: string;
+          created_by?: string;
+          effective_from?: string;
+          effective_to?: string;
+          end_time?: string;
+          group_id?: string;
+          id?: string;
+          is_active?: boolean;
+          replaces_id?: string | null;
+          series_id?: string;
+          start_time?: string;
+          teacher_id?: string;
+          tenant_id?: string;
+          timezone?: string;
+          updated_at?: string;
+          version?: number;
+          weekday?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "group_schedule_slots_tenant_id_classroom_id_branch_id_fkey";
+            columns: ["tenant_id", "classroom_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "classrooms";
+            referencedColumns: ["tenant_id", "id", "branch_id"];
+          },
+          {
+            foreignKeyName: "group_schedule_slots_tenant_id_replaces_id_fkey";
+            columns: ["tenant_id", "replaces_id"];
+            isOneToOne: true;
+            referencedRelation: "group_schedule_slots";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "group_schedule_slots_tenant_id_series_id_group_id_branch_i_fkey";
+            columns: ["tenant_id", "series_id", "group_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "group_schedule_series";
+            referencedColumns: ["tenant_id", "id", "group_id", "branch_id"];
+          },
+          {
+            foreignKeyName: "group_schedule_slots_tenant_id_teacher_id_fkey";
+            columns: ["tenant_id", "teacher_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       group_teacher_assignments: {
         Row: {
           assigned_at: string;
@@ -2293,6 +2425,254 @@ export type Database = {
           },
         ];
       };
+      lesson_expected_students: {
+        Row: {
+          branch_id: string;
+          customer_id: string;
+          enrollment_id: string;
+          group_id: string;
+          lesson_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          customer_id: string;
+          enrollment_id: string;
+          group_id: string;
+          lesson_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          branch_id?: string;
+          customer_id?: string;
+          enrollment_id?: string;
+          group_id?: string;
+          lesson_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lesson_expected_students_tenant_id_enrollment_id_customer__fkey";
+            columns: [
+              "tenant_id",
+              "enrollment_id",
+              "customer_id",
+              "group_id",
+              "branch_id",
+            ];
+            isOneToOne: false;
+            referencedRelation: "student_enrollments";
+            referencedColumns: [
+              "tenant_id",
+              "id",
+              "customer_id",
+              "group_id",
+              "branch_id",
+            ];
+          },
+          {
+            foreignKeyName: "lesson_expected_students_tenant_id_lesson_id_group_id_bran_fkey";
+            columns: ["tenant_id", "lesson_id", "group_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["tenant_id", "id", "group_id", "branch_id"];
+          },
+        ];
+      };
+      lesson_generation_batches: {
+        Row: {
+          branch_id: string;
+          created_at: string;
+          created_by: string;
+          created_count: number;
+          existing_count: number;
+          from_date: string;
+          group_id: string;
+          id: string;
+          past_count: number;
+          tenant_id: string;
+          to_date: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          created_at?: string;
+          created_by: string;
+          created_count: number;
+          existing_count: number;
+          from_date: string;
+          group_id: string;
+          id?: string;
+          past_count: number;
+          tenant_id: string;
+          to_date: string;
+        };
+        Update: {
+          branch_id?: string;
+          created_at?: string;
+          created_by?: string;
+          created_count?: number;
+          existing_count?: number;
+          from_date?: string;
+          group_id?: string;
+          id?: string;
+          past_count?: number;
+          tenant_id?: string;
+          to_date?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lesson_generation_batches_tenant_id_group_id_branch_id_fkey";
+            columns: ["tenant_id", "group_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "study_groups";
+            referencedColumns: ["tenant_id", "id", "branch_id"];
+          },
+        ];
+      };
+      lessons: {
+        Row: {
+          branch_id: string;
+          classroom_id: string | null;
+          created_at: string;
+          created_by: string;
+          effective_teacher_id: string | null;
+          ends_at: string;
+          group_id: string;
+          id: string;
+          notes: string;
+          occurrence_date: string | null;
+          rescheduled_from_id: string | null;
+          roster_captured_at: string | null;
+          schedule_slot_id: string | null;
+          schedule_version: number | null;
+          series_id: string | null;
+          starts_at: string;
+          status: string;
+          substitute_id: string | null;
+          teacher_id: string;
+          tenant_id: string;
+          timezone: string;
+          title: string;
+          updated_at: string;
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          classroom_id?: string | null;
+          created_at?: string;
+          created_by: string;
+          effective_teacher_id?: never;
+          ends_at: string;
+          group_id: string;
+          id?: string;
+          notes?: string;
+          occurrence_date?: string | null;
+          rescheduled_from_id?: string | null;
+          roster_captured_at?: string | null;
+          schedule_slot_id?: string | null;
+          schedule_version?: number | null;
+          series_id?: string | null;
+          starts_at: string;
+          status?: string;
+          substitute_id?: string | null;
+          teacher_id: string;
+          tenant_id: string;
+          timezone: string;
+          title: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Update: {
+          branch_id?: string;
+          classroom_id?: string | null;
+          created_at?: string;
+          created_by?: string;
+          effective_teacher_id?: never;
+          ends_at?: string;
+          group_id?: string;
+          id?: string;
+          notes?: string;
+          occurrence_date?: string | null;
+          rescheduled_from_id?: string | null;
+          roster_captured_at?: string | null;
+          schedule_slot_id?: string | null;
+          schedule_version?: number | null;
+          series_id?: string | null;
+          starts_at?: string;
+          status?: string;
+          substitute_id?: string | null;
+          teacher_id?: string;
+          tenant_id?: string;
+          timezone?: string;
+          title?: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lessons_tenant_id_classroom_id_branch_id_fkey";
+            columns: ["tenant_id", "classroom_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "classrooms";
+            referencedColumns: ["tenant_id", "id", "branch_id"];
+          },
+          {
+            foreignKeyName: "lessons_tenant_id_group_id_branch_id_fkey";
+            columns: ["tenant_id", "group_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "study_groups";
+            referencedColumns: ["tenant_id", "id", "branch_id"];
+          },
+          {
+            foreignKeyName: "lessons_tenant_id_rescheduled_from_id_group_id_branch_id_fkey";
+            columns: [
+              "tenant_id",
+              "rescheduled_from_id",
+              "group_id",
+              "branch_id",
+            ];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["tenant_id", "id", "group_id", "branch_id"];
+          },
+          {
+            foreignKeyName: "lessons_tenant_id_schedule_slot_id_series_id_group_id_bran_fkey";
+            columns: [
+              "tenant_id",
+              "schedule_slot_id",
+              "series_id",
+              "group_id",
+              "branch_id",
+            ];
+            isOneToOne: false;
+            referencedRelation: "group_schedule_slots";
+            referencedColumns: [
+              "tenant_id",
+              "id",
+              "series_id",
+              "group_id",
+              "branch_id",
+            ];
+          },
+          {
+            foreignKeyName: "lessons_tenant_id_substitute_id_fkey";
+            columns: ["tenant_id", "substitute_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "lessons_tenant_id_teacher_id_fkey";
+            columns: ["tenant_id", "teacher_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       lms_commands: {
         Row: {
           actor_id: string;
@@ -2772,6 +3152,77 @@ export type Database = {
             columns: ["tenant_id", "pipeline_id"];
             isOneToOne: false;
             referencedRelation: "sales_pipelines";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      scheduling_events: {
+        Row: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data: Json | null;
+          branch_id: string;
+          created_at: string;
+          group_id: string;
+          id: string;
+          lesson_id: string | null;
+          operation: string;
+          reason: string;
+          slot_id: string | null;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data?: Json | null;
+          branch_id: string;
+          created_at?: string;
+          group_id: string;
+          id?: string;
+          lesson_id?: string | null;
+          operation: string;
+          reason?: string;
+          slot_id?: string | null;
+          tenant_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          actor_name?: string;
+          after_data?: NonNullable<Json>;
+          before_data?: Json | null;
+          branch_id?: string;
+          created_at?: string;
+          group_id?: string;
+          id?: string;
+          lesson_id?: string | null;
+          operation?: string;
+          reason?: string;
+          slot_id?: string | null;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "scheduling_events_tenant_id_group_id_branch_id_fkey";
+            columns: ["tenant_id", "group_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "study_groups";
+            referencedColumns: ["tenant_id", "id", "branch_id"];
+          },
+          {
+            foreignKeyName: "scheduling_events_tenant_id_lesson_id_fkey";
+            columns: ["tenant_id", "lesson_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "scheduling_events_tenant_id_slot_id_fkey";
+            columns: ["tenant_id", "slot_id"];
+            isOneToOne: false;
+            referencedRelation: "group_schedule_slots";
             referencedColumns: ["tenant_id", "id"];
           },
         ];
@@ -3407,6 +3858,17 @@ export type Database = {
         Args: { p_filters?: Json; p_page?: number; p_tenant: string };
         Returns: Json;
       };
+      end_group_schedule: {
+        Args: {
+          p_from: string;
+          p_reason: string;
+          p_request: string;
+          p_slot: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
       enrollment_directory: {
         Args: { p_filters?: Json; p_page?: number; p_tenant: string };
         Returns: Json;
@@ -3463,12 +3925,39 @@ export type Database = {
         Args: { p_tenant: string; p_transaction: string };
         Returns: Json;
       };
+      generate_group_lessons: {
+        Args: {
+          p_from: string;
+          p_group: string;
+          p_request: string;
+          p_tenant: string;
+          p_to: string;
+        };
+        Returns: Json;
+      };
+      generation_batch_details: {
+        Args: { p_batch: string; p_tenant: string };
+        Returns: Json;
+      };
       get_employee_salary: {
         Args: { p_employee: string; p_tenant: string };
         Returns: Json;
       };
       group_directory: {
         Args: { p_filters?: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
+      group_schedule_details: {
+        Args: { p_history_page?: number; p_slot: string; p_tenant: string };
+        Returns: Json;
+      };
+      group_schedule_directory: {
+        Args: {
+          p_group: string;
+          p_page?: number;
+          p_status?: string;
+          p_tenant: string;
+        };
         Returns: Json;
       };
       group_student_choices: {
@@ -3528,6 +4017,23 @@ export type Database = {
           phone: string;
           status: string;
         }[];
+      };
+      lesson_details: {
+        Args: { p_history_page?: number; p_lesson: string; p_tenant: string };
+        Returns: Json;
+      };
+      lesson_directory: {
+        Args: {
+          p_calendar?: boolean;
+          p_filters?: Json;
+          p_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      lesson_expected_roster: {
+        Args: { p_lesson: string; p_page?: number; p_tenant: string };
+        Returns: Json;
       };
       list_business_members: {
         Args: { p_tenant: string };
@@ -3636,6 +4142,17 @@ export type Database = {
       reorder_sales_stages: {
         Args: { p_pipeline: string; p_stages: string[]; p_tenant: string };
         Returns: undefined;
+      };
+      reschedule_lesson: {
+        Args: {
+          p_data: Json;
+          p_lesson: string;
+          p_reason: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
       };
       reverse_financial_transaction: {
         Args: {
@@ -3809,6 +4326,18 @@ export type Database = {
         };
         Returns: string;
       };
+      save_group_schedule: {
+        Args: {
+          p_data: Json;
+          p_group: string;
+          p_id: string;
+          p_reason: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
       save_invoice_draft: {
         Args: {
           p_data: Json;
@@ -3826,6 +4355,18 @@ export type Database = {
       };
       save_lead_followup: {
         Args: { p_data: Json; p_id: string; p_lead: string; p_tenant: string };
+        Returns: string;
+      };
+      save_lesson: {
+        Args: {
+          p_data: Json;
+          p_group: string;
+          p_id: string;
+          p_reason: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
         Returns: string;
       };
       save_sales_setting: {
@@ -3869,6 +4410,19 @@ export type Database = {
           p_version: number;
         };
         Returns: string;
+      };
+      scheduling_history: {
+        Args: {
+          p_id: string;
+          p_kind: string;
+          p_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      scheduling_options: {
+        Args: { p_group: string; p_tenant: string };
+        Returns: Json;
       };
       set_academic_active: {
         Args: {
@@ -3927,6 +4481,7 @@ export type Database = {
         Args: { p_group: string; p_history_page?: number; p_tenant: string };
         Returns: Json;
       };
+      timetable_options: { Args: { p_tenant: string }; Returns: Json };
       transfer_student_enrollment: {
         Args: {
           p_add_branch?: boolean;
@@ -3947,6 +4502,17 @@ export type Database = {
           p_invoice: string;
           p_reason?: string;
           p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
+      transition_lesson: {
+        Args: {
+          p_lesson: string;
+          p_reason: string;
+          p_request: string;
+          p_status: string;
           p_tenant: string;
           p_version: number;
         };

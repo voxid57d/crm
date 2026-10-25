@@ -14,8 +14,8 @@ export const modules = [
   },
   {
     slug: "schedule",
-    title: "Schedule",
-    description: "Branch timetables, classrooms, and lesson planning.",
+    title: "Timetable",
+    description: "Daily, weekly and monthly views of authorized group lessons.",
     category: "Learning",
   },
   {

@@ -61,6 +61,29 @@ export default async function GroupProfile({
         </p>
       )}
       <div className="flex flex-wrap gap-3">
+        {w.branchPermissions.get(g.branch_id)?.has("schedules.view") && (
+          <Button asChild variant="outline">
+            <Link href={`/groups/${id}/schedules`}>Weekly schedules</Link>
+          </Button>
+        )}
+        {w.branchPermissions.get(g.branch_id)?.has("lessons.view") && (
+          <>
+            <Button asChild variant="outline">
+              <Link href={`/lessons?group=${id}`}>Group lessons</Link>
+            </Button>
+            <Button asChild variant="outline">
+              <Link href={`/timetable?group=${id}`}>Group timetable</Link>
+            </Button>
+          </>
+        )}
+        {w.branchPermissions.get(g.branch_id)?.has("lessons.manage") &&
+          ["planned", "active"].includes(g.status) && (
+            <Button asChild variant="outline">
+              <Link href={`/lessons/new?group=${id}`}>
+                Add individual lesson
+              </Link>
+            </Button>
+          )}
         {d.can_update &&
           !["completed", "cancelled", "archived"].includes(g.status) && (
             <Button asChild variant="outline">
@@ -106,8 +129,8 @@ export default async function GroupProfile({
         </dl>
         <p className="text-sm text-muted-foreground">
           Pending, active and paused enrollments reserve seats. Counts reflect
-          real records in this group. Weekly schedules and lessons are added in
-          Step 7C.
+          real records in this group. Weekly plans and individual lessons are
+          managed separately; no billing or attendance is created by scheduling.
         </p>
       </section>
       <section className="space-y-3 rounded-xl border bg-white p-5">

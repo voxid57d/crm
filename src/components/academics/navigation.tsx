@@ -20,6 +20,12 @@ export function AcademicNavigation() {
       <Link className="underline underline-offset-4" href="/enrollments">
         Enrollments
       </Link>
+      <Link className="underline underline-offset-4" href="/lessons">
+        Lessons
+      </Link>
+      <Link className="underline underline-offset-4" href="/timetable">
+        Timetable
+      </Link>
     </nav>
   );
 }

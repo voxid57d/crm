@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 export default function AcademicError({ reset }: { reset: () => void }) {
   const current = usePathname();
   const path =
-    ["/classrooms", "/groups", "/enrollments"].find((p) =>
-      current.startsWith(p),
+    ["/classrooms", "/groups", "/enrollments", "/lessons", "/timetable"].find(
+      (p) => current.startsWith(p),
     ) ?? "/courses";
   return (
     <div role="alert" className="space-y-4 rounded-xl border bg-white p-6">

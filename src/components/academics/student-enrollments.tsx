@@ -31,8 +31,8 @@ export async function StudentEnrollments({
       </h2>
       <p className="text-sm text-muted-foreground">
         Enrollments reference this original Student Profile. Only authorized
-        groups appear; tuition requires a separate pricing permission. Lessons
-        and attendance will be added in later increments.
+        groups appear; tuition requires a separate pricing permission. Open a
+        group for its lessons and timetable. Attendance will be added later.
       </p>
       <EnrollmentList
         rows={d.rows}

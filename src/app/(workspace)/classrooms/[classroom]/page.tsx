@@ -74,9 +74,18 @@ export default async function ClassroomProfile({
       <section className="space-y-2 rounded-xl border border-dashed p-5">
         <h2 className="font-semibold">Classroom schedule</h2>
         <p className="text-sm text-muted-foreground">
-          Lesson schedules and occupancy will be available with Step 7C. This
-          page does not imply that the room is free for a particular time.
+          Review individual and generated lessons in the timetable. Weekly plans
+          also reserve resources before generation; availability is checked when
+          scheduling a lesson.
         </p>
+        {w.branchPermissions.get(r.branch_id)?.has("schedules.view") && (
+          <Link
+            href={`/timetable?classroom=${id}&branch=${r.branch_id}`}
+            className="inline-block text-sm text-primary underline"
+          >
+            View classroom timetable
+          </Link>
+        )}
       </section>
       {d.can_manage && (
         <>

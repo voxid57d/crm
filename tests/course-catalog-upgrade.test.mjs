@@ -3,16 +3,25 @@ import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { createTestDatabase } from "./helpers/database.mjs";
-for (const phase of ["7A", "7B"])
+for (const phase of ["7A", "7B", "7C"])
   test(`${phase} populated upgrade preserves student, guardians, conversion, salary and posted financial history`, async (t) => {
     const directory = new URL("../supabase/migrations/", import.meta.url),
       files = (await readdir(directory))
         .filter(
-          (f) => f.endsWith(".sql") && (phase === "7B" || f < "20261025000400"),
+          (f) =>
+            f.endsWith(".sql") &&
+            (phase === "7C" ||
+              f < (phase === "7B" ? "20261025000900" : "20261025000400")),
         )
         .sort(),
       boundary = files.findIndex((f) =>
-        f.startsWith(phase === "7A" ? "20261025000100" : "20261025000400"),
+        f.startsWith(
+          phase === "7A"
+            ? "20261025000100"
+            : phase === "7B"
+              ? "20261025000400"
+              : "20261025000900",
+        ),
       );
     assert.ok(boundary > 0);
     const db = await createTestDatabase({ migrationCount: boundary });
@@ -158,6 +167,86 @@ for (const phase of ["7A", "7B"])
       await db.exec("set role authenticated");
       return result;
     };
+    let priorGroup, priorCourse, priorEnrollment, priorAcademic;
+    const academicSnapshot = async () => {
+      await db.exec("reset role");
+      const result = {};
+      for (const [table, key, id] of [
+        ["study_groups", "id", priorGroup],
+        ["courses", "id", priorCourse],
+        ["student_enrollments", "id", priorEnrollment],
+      ])
+        result[table] = (
+          await rows(
+            `select row_to_json(x) d from public.${table} x where ${key}=$1`,
+            [id],
+          )
+        )[0].d;
+      await db.exec("set role authenticated");
+      return result;
+    };
+    if (phase === "7C") {
+      priorCourse = (
+        await rows("select public.save_course($1,null,$2,0,$3) id", [
+          tenant,
+          randomUUID(),
+          {
+            name: "Existing 7B course",
+            standard_price: "750000.10",
+            pricing_model: "monthly",
+          },
+        ])
+      )[0].id;
+      priorGroup = (
+        await rows("select public.save_study_group($1,null,$2,0,$3) id", [
+          tenant,
+          randomUUID(),
+          {
+            branch_id: branch,
+            course_id: priorCourse,
+            name: "Existing 7B group",
+            start_date: today,
+            capacity: "12",
+          },
+        ])
+      )[0].id;
+      await db.exec("reset role");
+      await rows("update public.employees set user_id=$1 where id=$2", [
+        uid,
+        employee,
+      ]);
+      await db.exec("set role authenticated");
+      await rows("select public.set_group_teachers($1,$2,$3,1,$4,$5)", [
+        tenant,
+        priorGroup,
+        randomUUID(),
+        [employee],
+        employee,
+      ]);
+      await rows(
+        "select public.change_group_status($1,$2,$3,2,'active','Existing teaching')",
+        [tenant, priorGroup, randomUUID()],
+      );
+      priorEnrollment = (
+        await rows(
+          "select public.create_student_enrollment($1,$2,$3,$4,$5) id",
+          [
+            tenant,
+            priorGroup,
+            student,
+            randomUUID(),
+            {
+              enrollment_date: today,
+              effective_start_date: today,
+              agreed_price: "750000.10",
+              pricing_model: "monthly",
+              status: "active",
+            },
+          ],
+        )
+      )[0].id;
+      priorAcademic = await academicSnapshot();
+    }
     const before = await snapshot(),
       finance = (
         await rows("select public.customer_financial_profile($1,$2) v", [
@@ -170,6 +259,72 @@ for (const phase of ["7A", "7B"])
       await db.exec(await readFile(new URL(file, directory), "utf8"));
     await db.exec("set role authenticated");
     assert.deepEqual(await snapshot(), before);
+    if (phase === "7C") {
+      assert.deepEqual(await academicSnapshot(), priorAcademic);
+      const tomorrow = (await rows("select ($1::date+1)::text d", [today]))[0]
+          .d,
+        through = (await rows("select ($1::date+7)::text d", [today]))[0].d,
+        weekday = (
+          await rows("select extract(isodow from $1::date)::integer d", [
+            tomorrow,
+          ])
+        )[0].d;
+      await rows("select public.save_group_schedule($1,$2,null,$3,0,$4,$5)", [
+        tenant,
+        priorGroup,
+        randomUUID(),
+        {
+          weekday: String(weekday),
+          start_time: "14:00",
+          end_time: "15:00",
+          timezone: "Asia/Tashkent",
+          effective_from: tomorrow,
+          effective_to: through,
+          teacher_id: employee,
+        },
+        "Preserve existing agreements",
+      ]);
+      const batch = (
+        await rows("select public.generate_group_lessons($1,$2,$3,$4,$5) d", [
+          tenant,
+          priorGroup,
+          randomUUID(),
+          tomorrow,
+          through,
+        ])
+      )[0].d;
+      assert.equal(batch.created_count, 1);
+      const lesson = (
+        await rows("select public.save_lesson($1,$2,null,$3,0,$4,$5) id", [
+          tenant,
+          priorGroup,
+          randomUUID(),
+          {
+            local_start: tomorrow + "T16:00",
+            local_end: tomorrow + "T17:00",
+            timezone: "Asia/Tashkent",
+            teacher_id: employee,
+            title: "Financial continuity lesson",
+          },
+          "Separate academic planning",
+        ])
+      )[0].id;
+      await rows("select public.reschedule_lesson($1,$2,$3,1,$4,$5)", [
+        tenant,
+        lesson,
+        randomUUID(),
+        {
+          local_start: tomorrow + "T17:00",
+          local_end: tomorrow + "T18:00",
+          timezone: "Asia/Tashkent",
+          teacher_id: employee,
+          title: "Retained reschedule",
+        },
+        "Preserve historical identities",
+      ]);
+      assert.deepEqual(await academicSnapshot(), priorAcademic);
+      assert.deepEqual(await snapshot(), before);
+    }
     assert.deepEqual(
       (
         await rows("select public.customer_financial_profile($1,$2) v", [
@@ -205,7 +360,7 @@ for (const phase of ["7A", "7B"])
       randomUUID(),
       { branch_id: branch, name: "Real classroom", capacity: "12" },
     ]);
-    if (phase === "7B") {
+    if (phase !== "7A") {
       const group = (
         await rows("select public.save_study_group($1,null,$2,0,$3) id", [
           tenant,
@@ -308,8 +463,9 @@ for (const phase of ["7A", "7B"])
         (await rows("select to_regclass('public.student_enrollments') v"))[0].v,
         null,
       );
-    assert.equal(
-      (await rows("select to_regclass('public.lessons') v"))[0].v,
-      null,
-    );
+    if (phase !== "7C")
+      assert.equal(
+        (await rows("select to_regclass('public.lessons') v"))[0].v,
+        null,
+      );
   });

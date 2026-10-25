@@ -26,6 +26,18 @@ const labels: Record<string, string> = {
   agreed_price: "Agreed price",
   notes: "Academic administration notes",
   teachers: "Teachers",
+  title: "Lesson title / topic",
+  timezone: "Timezone",
+  weekday: "Weekday (Monday = 1)",
+  start_time: "Local start",
+  end_time: "Local end",
+  effective_from: "Period starts",
+  effective_to: "Period ends",
+  starts_at: "Scheduled start",
+  ends_at: "Scheduled end",
+  teacher_name: "Assigned teacher",
+  substitute_name: "Substitute teacher",
+  roster_captured_at: "Expected roster captured",
 };
 function object(v: Json): Record<string, Json | undefined> {
   return v && typeof v === "object" && !Array.isArray(v) ? v : {};
