@@ -3,9 +3,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 export default function AcademicError({ reset }: { reset: () => void }) {
-  const path = usePathname().startsWith("/classrooms")
-    ? "/classrooms"
-    : "/courses";
+  const current = usePathname();
+  const path =
+    ["/classrooms", "/groups", "/enrollments"].find((p) =>
+      current.startsWith(p),
+    ) ?? "/courses";
   return (
     <div role="alert" className="space-y-4 rounded-xl border bg-white p-6">
       <h1 className="text-xl font-semibold">

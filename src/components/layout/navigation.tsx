@@ -30,6 +30,8 @@ const groups = [
     links: [
       { href: "/students", label: "Students", icon: GraduationCap },
       { href: "/courses", label: "Courses", icon: BookOpen },
+      { href: "/groups", label: "Groups", icon: Users },
+      { href: "/enrollments", label: "Enrollments", icon: GraduationCap },
       { href: "/classrooms", label: "Classrooms", icon: Building2 },
       { href: "/modules/schedule", label: "Schedule", icon: CalendarDays },
       { href: "/modules/attendance", label: "Attendance", icon: CheckSquare2 },

@@ -1,6 +1,36 @@
-# Verification record — 25 October 2026 (through Step 7A)
+# Verification record — 25 October 2026 (through Step 7B)
 
-## Step 7A: current verification
+## Step 7B: current verification
+
+Baseline `ea2af6e` was clean. Inspected the course/classroom schema and RLS, employee invitation/branch/role contracts, shared customer/Student Profile/guardian identities, student creation and financial links, existing components, tests and installed Next.js security/Server Actions guides before coding. Strict TypeScript and 178 portable tests passed before changes. Existing Docker Desktop/local Supabase records were retained and the running Next.js port-3000 server reused. No reset, new dependency/environment variable, hosted connection or deployment was introduced. The [group/enrollment guide](lms-groups-enrollments.md) records design decisions, schema, permissions and manual testing.
+
+| Check                      | Final result                                                                                    |
+| -------------------------- | ----------------------------------------------------------------------------------------------- |
+| `npm run check`            | Passed: ESLint, strict TypeScript, **194 portable tests**, optimized local production build     |
+| `npm run test:integration` | **85 tests passed across 11 suites** using real local Auth/PostgREST/Storage and rendered forms |
+| `npm run db:test`          | **200 assertions passed across 13 native PostgreSQL suites**, fixtures rolled back              |
+| `npm run test:smoke`       | **88 protected routes passed**, plus public/home/platform/callback boundaries                   |
+| `npm run db:lint`          | No new issues; existing unused variable `m` warning in `public.save_employee` remains           |
+| Migrations/types           | Five additive 7B migrations applied locally; actual schema types refreshed                      |
+| Formatting/whitespace      | Prettier and Git diff whitespace checks passed                                                  |
+
+New portable tests execute real migration SQL to verify branch/course identity, optional room/online groups, room capacity, metadata versions, shared-course multi-branch groups, existing-student-only enrollment, exact/free agreements, invalid money rollback, duplicate open enrollment, pending/active/paused seat reservation, status transitions, retained agreements after catalog edits, explicit branch addition, failed-transfer rollback and successful linked transfers. They verify multi-teacher primary/replacement history, employee/role eligibility, assigned Teacher privacy and access revocation, scoped Managers, ordinary Employees, foreign/subjectless IDs, no direct writes, immutable agreements/deletion guards and actual pagination/search/scope counts. A source lacking agreement-pricing permission cannot transfer simply because destination pricing is granted.
+
+The populated upgrade fixture now runs independently for 7A and 7B. It retains an original guardian-linked student, converted lead, exact salary configuration, issued invoice, partial payment/allocation and credit. Complete original record hashes and exact financial profiles remain unchanged after 7B migration, course edits, enrollment and transfer. New academic records continue referencing the original Student Profile/customer identity; no competing person or financial system was introduced. Only explicit authorized financial commands can affect posted sources.
+
+Native PostgreSQL independently covers RLS/grants, original Student Profile references, exact text tuition, request replay, stale versions, reserved seats, duplicate prevention, close-before-terminal group rules, actual employee invitation acceptance, assigned-group-only teaching access, redacted price/notes/history and finance denial, linked transfers, no duplicate contacts, foreign/direct metadata/subjectless isolation and zero financial postings. Deferred constraints were forced immediate for valid operations. A privileged direct overbooking insert is rejected by the deferred capacity constraint and rolls back entirely.
+
+Live tests submit actual Next.js group create/edit/status, student-create return flow, enrollment agreement/status, primary/additional teacher assignment and transfer forms. Real invitations link teachers to employees, including a teacher assigned across branches. Database prices, canonical Student Profile/roster links, original source agreements, retained old/new student branches, terminal/archive history and permissions are inspected after writes. Two concurrent last-seat enrollments allow one winner; matching retries produce one enrollment; competing transfers yield one version winner and one conflict. A full target transfer leaves the source/history unchanged. The full preceding Auth/HR/student-first/customer/sales/financial/catalog suites also pass.
+
+Schema lint identified a STABLE text-to-date contract during development; an additive migration corrected it. An additional migration rechecks shared CRM scope after locking and enforces source pricing authorization during transfer. Test fixtures were corrected for Next.js streaming redirects, the expected retained assignment count and a dependent missing student fixture; no authorization was weakened. Final runs have zero test failures.
+
+Changed areas: group query/action/types files under `src/features/academics`, reusable delivery forms/roster/profile sections, protected `/groups/*` and `/enrollments/*`, course counts, existing Student Profile enrollment list and Add Student return context, navigation/breadcrumbs/dashboard availability, generated schema/nullable RPC refinements, five migrations and portable/native/live/smoke tests. The existing student creation/conversion and finance services remain authoritative.
+
+No new manual installation/configuration is required on this machine. Open <http://127.0.0.1:3000>; create a group, assign invited eligible employees, enroll original students, exercise capacity/status/transfer and inspect the original profile. Restart later with Docker Desktop, `npm run db:start`, `npm run db:migrate`, `npm run dev`. Native fixtures roll back; isolated live test accounts/business records remain locally for inspection. No remote push is part of this checkpoint.
+
+Remaining manual QA: visual/mobile/keyboard/focus and native confirmation interactions, earlier password-recovery link redemption/sales dragging/print layout, production-size load and deployment. Read-only academic rosters deliberately expose less than whole CRM profiles. Future-dated transfers, calendar-effective occupancy, schedules/lessons/conflicts and attendance are unimplemented; status-based reservations are documented. Full timetable/dashboard/invoice integration belongs to later increments. Guardian/debtor/payer distinctions and financial permissions remain unchanged. Await user instruction before 7C.
+
+## Step 7A: historical verification
 
 Inspected the existing migrations, student/customer/guardian identities, conversion and financial links, roles/branch assignments, UI and test infrastructure before implementation. Read the installed Next.js data-security and Server Actions guides. Baseline: 165 portable tests, 151 native assertions and the ten-test student-first live suite passed. Docker Desktop and the app were started locally with retained data; no database reset or hosted connection was used. The [course/classroom guide](lms-course-catalog.md) documents the inspection, implementation contract and manual walkthrough.
 

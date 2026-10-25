@@ -8,6 +8,7 @@ import { text, email, uuid, InputError } from "@/lib/validation.mjs";
 import type { ActionState } from "@/features/shared/action-state";
 import type { DuplicateState } from "./types";
 import { parseCustomerForm } from "./parsers";
+import { getGroup } from "@/features/academics/group-queries";
 
 function failed(error: unknown): ActionState {
   unstable_rethrow(error);
@@ -88,7 +89,7 @@ export async function saveStudent(
   _state: ActionState,
   form: FormData,
 ): Promise<ActionState> {
-  let saved: string;
+  let saved: string, enrollmentGroup: string | undefined;
   try {
     const workspace = await context(form),
       id = form.get("customer_id") ? uuid(form.get("customer_id")) : null,
@@ -99,6 +100,18 @@ export async function saveStudent(
         throw new InputError(
           "Restore this contact before adding or editing its student profile.",
         );
+    }
+    const groupValue = text(form, "enroll_group");
+    if (groupValue) {
+      const group = await getGroup(uuid(groupValue));
+      if (
+        !group.detail.can_enroll ||
+        !["planned", "active"].includes(group.detail.group.status)
+      )
+        throw new InputError(
+          "Group enrollment access changed. Return to the group before creating a student.",
+        );
+      enrollmentGroup = group.detail.group.id;
     }
     const options = await customerOptions(),
       input = parseCustomerForm(form, options, true);
@@ -142,7 +155,11 @@ export async function saveStudent(
     return failed(e);
   }
   refresh();
-  redirect(`/students/${saved}?saved=1`);
+  redirect(
+    enrollmentGroup
+      ? `/groups/${enrollmentGroup}/enroll?student=${saved}`
+      : `/students/${saved}?saved=1`,
+  );
 }
 export async function archiveCustomer(
   _state: ActionState,

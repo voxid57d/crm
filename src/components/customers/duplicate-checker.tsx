@@ -12,6 +12,7 @@ export function DuplicateChecker({
   email = "",
   name = "",
   studentFirst = false,
+  enrollmentGroup,
 }: {
   tenantId: string;
   customerId?: string;
@@ -19,6 +20,7 @@ export function DuplicateChecker({
   email?: string;
   name?: string;
   studentFirst?: boolean;
+  enrollmentGroup?: string;
 }) {
   const [state, action, pending] = useActionState(findDuplicates, {});
   return (
@@ -74,7 +76,7 @@ export function DuplicateChecker({
                     <Link
                       href={
                         studentFirst && !m.archived
-                          ? `/students/new?existing=${m.id}`
+                          ? `/students/new?existing=${m.id}${enrollmentGroup ? `&enroll_group=${encodeURIComponent(enrollmentGroup)}` : ""}`
                           : `/customers/${m.id}`
                       }
                       className="font-medium text-primary underline"

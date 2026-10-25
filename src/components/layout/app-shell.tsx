@@ -45,18 +45,22 @@ export function AppShell({
                   ? "Students"
                   : pathname.startsWith("/courses")
                     ? "Courses"
-                    : pathname.startsWith("/classrooms")
-                      ? "Classrooms"
-                      : pathname.startsWith("/employees")
-                        ? "Employees"
-                        : pathname === "/roles"
-                          ? "Roles & permissions"
-                          : pathname.startsWith("/sales") ||
-                              pathname.startsWith("/leads")
-                            ? "Sales CRM"
-                            : pathname.startsWith("/finance")
-                              ? "Finance"
-                              : "Modules";
+                    : pathname.startsWith("/groups")
+                      ? "Groups"
+                      : pathname.startsWith("/enrollments")
+                        ? "Enrollments"
+                        : pathname.startsWith("/classrooms")
+                          ? "Classrooms"
+                          : pathname.startsWith("/employees")
+                            ? "Employees"
+                            : pathname === "/roles"
+                              ? "Roles & permissions"
+                              : pathname.startsWith("/sales") ||
+                                  pathname.startsWith("/leads")
+                                ? "Sales CRM"
+                                : pathname.startsWith("/finance")
+                                  ? "Finance"
+                                  : "Modules";
   return (
     <div className="min-h-screen">
       <a

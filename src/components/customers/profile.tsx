@@ -15,6 +15,7 @@ import {
 } from "@/features/finance/invoice-queries";
 import { CustomerFinanceCard } from "@/components/finance/customer-finance-card";
 import { ContactFinances } from "@/components/finance/contact-finances";
+import { StudentEnrollments } from "@/components/academics/student-enrollments";
 
 function NoteKind({ value = "note" }: { value?: string }) {
   return (
@@ -36,6 +37,7 @@ export type ProfileSearch = {
   finance_page?: string;
   payment_page?: string;
   refund_page?: string;
+  enrollment_page?: string;
 };
 export async function ContactProfile({
   id,
@@ -490,15 +492,24 @@ export async function ContactProfile({
             </p>
           </section>
         )}
-        <section id="learning" className="rounded-xl border bg-white p-5">
-          <h2 className="font-semibold">
-            Courses, groups, lessons & attendance
-          </h2>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Reserved for future LMS integration. No course enrollment or lesson
-            records are available in this phase.
-          </p>
-        </section>
+        {student ? (
+          <StudentEnrollments
+            studentId={id}
+            path={`${base}/${id}`}
+            page={page(filters.enrollment_page)}
+          />
+        ) : (
+          <section id="learning" className="rounded-xl border bg-white p-5">
+            <h2 className="font-semibold">
+              Courses, groups, lessons & attendance
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Add a Student Profile through the existing Add Student workflow to
+              use academic enrollment. Lessons and attendance follow in later
+              increments.
+            </p>
+          </section>
+        )}
       </div>
       {allScopes(workspace, branchIds, "customers.archive") && (
         <section className="rounded-xl border bg-white p-5">

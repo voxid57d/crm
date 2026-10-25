@@ -143,8 +143,8 @@ export default async function DashboardPage() {
           Build your workspace, step by step
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Student profiles, the course catalog and classrooms are available.
-          Groups, schedules and attendance workflows will follow.
+          Student profiles, courses, classrooms, groups and enrollments are
+          available. Schedules, lessons and attendance workflows will follow.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {modules.slice(0, 4).map((entry) => (

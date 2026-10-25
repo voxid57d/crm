@@ -10,6 +10,7 @@ import { AcademicStateForm } from "@/components/academics/forms";
 import { AcademicHistoryPanel } from "@/components/academics/history";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { courseGroupSummary } from "@/features/academics/group-queries";
 export const metadata = { title: "Course profile" };
 export default async function CourseProfile({
   params,
@@ -22,7 +23,8 @@ export default async function CourseProfile({
     search = await searchParams,
     page = academicPage(search, "history_page"),
     { workspace: w, detail: d } = await getCourse(id, page),
-    c = d.course;
+    c = d.course,
+    summary = await courseGroupSummary(id);
   return (
     <div className="space-y-6">
       <Link href="/courses" className="text-primary underline">
@@ -104,9 +106,20 @@ export default async function CourseProfile({
       <section className="space-y-2 rounded-xl border border-dashed p-5">
         <h2 className="font-semibold">Groups and enrollments</h2>
         <p className="text-sm text-muted-foreground">
-          Branch groups and enrollment counts will be available in Step 7B. This
-          increment configures the catalog only.
+          {summary.groups} groups · {summary.active_groups} active groups ·{" "}
+          {summary.active_enrollments} active enrollments within your group
+          access. An enrollment counts once per group, even when a student has
+          multiple groups.
         </p>
+        {(w.permissions.has("groups.view") ||
+          w.permissions.has("groups.view_assigned")) && (
+          <Link
+            href={`/groups?course=${id}&branch=&status=all`}
+            className="text-sm text-primary underline"
+          >
+            View authorized course groups
+          </Link>
+        )}
       </section>
       {d.can_manage && (
         <>

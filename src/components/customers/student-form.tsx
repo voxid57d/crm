@@ -11,9 +11,13 @@ import { DuplicateChecker } from "./duplicate-checker";
 export function StudentForm({
   options,
   record,
+  enrollmentGroup,
+  enrollmentBranch,
 }: {
   options: Awaited<ReturnType<typeof customerOptions>>;
   record?: Awaited<ReturnType<typeof getCustomer>>;
+  enrollmentGroup?: string;
+  enrollmentBranch?: string;
 }) {
   const w = options.workspace;
   const allowed = record
@@ -40,6 +44,7 @@ export function StudentForm({
             : ""
         }
         studentFirst
+        enrollmentGroup={enrollmentGroup}
       />
       {record && !record.student && (
         <p className="rounded-xl border bg-secondary p-4 text-sm">
@@ -54,6 +59,9 @@ export function StudentForm({
         className="space-y-6 rounded-xl border bg-white p-5 sm:p-7"
       >
         <input type="hidden" name="request_id" value={randomUUID()} />
+        {enrollmentGroup && (
+          <input type="hidden" name="enroll_group" value={enrollmentGroup} />
+        )}
         <input
           type="hidden"
           name="student_mode"
@@ -63,7 +71,14 @@ export function StudentForm({
           options={options}
           customer={record?.customer}
           student={record?.student}
-          branchIds={record?.branchIds ?? (w.branch ? [w.branch.id] : [])}
+          branchIds={
+            record?.branchIds ??
+            (enrollmentBranch
+              ? [enrollmentBranch]
+              : w.branch
+                ? [w.branch.id]
+                : [])
+          }
           tagIds={record?.tagIds}
           values={record?.values}
           studentFirst

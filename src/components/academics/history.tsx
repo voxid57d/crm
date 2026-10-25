@@ -17,11 +17,30 @@ const labels: Record<string, string> = {
   is_active: "Active",
   capacity: "Capacity",
   branch_name: "Branch",
+  classroom_name: "Classroom",
+  start_date: "Start date",
+  end_date: "End date",
+  effective_start_date: "Effective start",
+  effective_end_date: "Effective end",
+  status: "Status",
+  agreed_price: "Agreed price",
+  notes: "Academic administration notes",
+  teachers: "Teachers",
 };
 function object(v: Json): Record<string, Json | undefined> {
   return v && typeof v === "object" && !Array.isArray(v) ? v : {};
 }
 function display(v: Json | undefined) {
+  if (Array.isArray(v))
+    return (
+      v
+        .map((x) =>
+          x && typeof x === "object" && !Array.isArray(x) && "name" in x
+            ? String(x.name) + (x.is_primary ? " (primary)" : "")
+            : String(x),
+        )
+        .join(", ") || "None"
+    );
   return v == null || v === ""
     ? "Not set"
     : typeof v === "boolean"
@@ -35,15 +54,17 @@ export function AcademicHistoryPanel({
   zone,
   path,
   page,
+  title = "Configuration history",
 }: {
   history: AcademicHistory;
   zone: string;
   path: string;
   page: number;
+  title?: string;
 }) {
   return (
     <section className="space-y-4">
-      <h2 className="text-xl font-semibold">Configuration history</h2>
+      <h2 className="text-xl font-semibold">{title}</h2>
       <p className="text-sm text-muted-foreground">
         Recorded changes are retained with their actor and time in {zone}.
       </p>

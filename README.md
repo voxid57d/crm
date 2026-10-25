@@ -1,12 +1,12 @@
 ﻿# Forma — local CRM/LMS platform
 
-Next.js/TypeScript, Tailwind/shadcn, and local Supabase. Implemented domains: Auth, business/branch workspaces, employees, tenant roles, invitations, confidential salary configuration, a student-first contact workflow (Step 6F), Sales CRM, financial management through Steps 6A–6E, and the Step 7A course catalog/classrooms. Finance includes cashboxes, invoices/receivables, payments/credit, expenses, transfers, refunds, corrections, dashboard and CSV reports. LMS groups/enrollments/lessons, external messaging/payment integrations, statutory accounting and payroll calculation/payouts remain unimplemented.
+Next.js/TypeScript, Tailwind/shadcn, and local Supabase. Implemented domains: Auth, business/branch workspaces, employees, tenant roles, invitations, confidential salary configuration, a student-first contact workflow (Step 6F), Sales CRM, financial management through Steps 6A–6E, the Step 7A course catalog/classrooms, and Step 7B groups, employee teacher assignments and student enrollments/transfers. Finance includes cashboxes, invoices/receivables, payments/credit, expenses, transfers, refunds, corrections, dashboard and CSV reports. Lessons/timetable, external messaging/payment integrations, statutory accounting and payroll calculation/payouts remain unimplemented.
 
 For education businesses, start at **[Students](http://127.0.0.1:3000/students)**. **Add Student** saves the shared identity and student profile in one form and opens a unified profile with guardians, notes, activity and authorized invoices/payments/refunds/debt/credit. **All contacts** provides secondary access to non-students. Existing customer URLs and financial IDs are preserved. See the [Step 6F inspection, architecture and testing walkthrough](docs/student-first.md).
 
 Local Docker/Supabase is configured. Native database tests and real local Auth/API/server-form tests cover the preceding modules and sales forms, follow-ups, loss/reopening, and transactional customer conversion. Browser dragging/rollback visuals, mobile/keyboard QA, native confirmation dialogs, and recovery-email link redemption remain manual. See [verification](docs/verification.md) for exact results and limits.
 
-**Courses** now provides a shared business catalog with custom categories/levels, duration, exact UZS pricing templates, edit/archive/reactivate and history. **Classrooms** provides real branch resources with capacity and scoped management. These operations create no charges or student records. See the [7A schema, permissions and manual walkthrough](docs/lms-course-catalog.md). Groups, enrollments, schedules and the academic dashboard await later increments.
+**Courses** provides the shared catalog and pricing templates; **Classrooms** provides branch rooms ([7A guide](docs/lms-course-catalog.md)). **Groups** now adds delivery capacity, primary/additional employee teachers, rosters and retained history. **Enrollments** reuses existing Student Profiles, snapshots exact tuition, manages lifecycle and transfers atomically. Teachers see only assigned groups with limited rosters and no tuition/finance access. These operations create no charges. See the [7B schema, permissions and walkthrough](docs/lms-groups-enrollments.md). Schedules/lessons and academic dashboard/invoice integration await 7C/7D.
 
 ## Start locally
 
@@ -51,6 +51,9 @@ Sales pages are `/sales`, `/leads`, `/sales/board`, `/leads/new`, `/leads/[lead]
 | `/branches`                                                                                    | Create/edit and activate/deactivate in authorized scope                                                                                                |
 | `/courses`, `/courses/new`, `/courses/[course]`, `/courses/[course]/edit`, `/courses/settings` | Shared catalog, category/level configuration, exact pricing templates, filtering/sorting/pagination and retained change history                        |
 | `/classrooms`, `/classrooms/new`, `/classrooms/[classroom]`, `/classrooms/[classroom]/edit`    | Actual branch rooms, capacity, scoped create/edit/deactivate/reactivate and retained history                                                           |
+| `/groups`, `/groups/new`, `/groups/[group]`, `/groups/[group]/edit`                            | Authorized course deliveries, capacity, lifecycle, teachers, real rosters and retained history                                                         |
+| `/groups/[group]/teachers`, `/groups/[group]/enroll`                                           | Primary/additional eligible employee teachers; existing or unified-form new Student Profile enrollment                                                 |
+| `/enrollments`, `/enrollments/[enrollment]`, `/enrollments/[enrollment]/transfer`              | Exact retained agreements, lifecycle, safe transfers and student history links                                                                         |
 | `/customers`, `/students`, `/customers/archived`                                               | Search/filter/sort/page authorized contacts, student-only contacts, or archived records; counts and current-branch default                             |
 | `/customers/new`, `/customers/[customer]/edit`                                                 | Shared contact, optional student profile, branch/tag/employee assignment, validated custom fields, duplicate suggestions                               |
 | `/customers/[customer]`                                                                        | Overview, protected notes/interactions, immutable activity, normalized guardians, archive/restore; future payment/LMS sections contain no fake records |
@@ -70,15 +73,15 @@ Forms use real Supabase queries/RPCs, server validation, pending/error/success f
 
 Seven default roles exist per tenant: Owner, Admin, Branch Manager, Sales Manager, Cashier, Teacher, Employee; existing Staff memberships retain a legacy role. System roles are immutable. Custom roles have immutable business/branch scope and explicit catalog grants. Administrators cannot delegate permissions they lack; branch roles cannot grant `roles.manage`. Future-module permissions create no working modules.
 
-| Role                    | Current access                                                                                                     |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Owner                   | Full own-business access; invitations/new account enrollment; canonical ownership protected                        |
-| Admin                   | Broad employee/salary/branch/role management; existing memberships only; no Owner-only invitations/enrollment      |
-| Branch Manager          | Employee/branch/classroom management in assigned branches; shared course catalog read; no salary access by default |
-| Sales Manager / Cashier | Existing sales/finance permissions within assigned branches                                                        |
-| Teacher                 | Shared course catalog and assigned-branch classroom read; no academic management or financial/salary grants        |
-| Employee / legacy Staff | Assigned active branch access; no HR/salary/role management by default                                             |
-| Custom role             | Explicit grants in its business or assigned branches                                                               |
+| Role                    | Current access                                                                                                                     |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Owner                   | Full own-business access; invitations/new account enrollment; canonical ownership protected                                        |
+| Admin                   | Broad employee/salary/branch/role management; existing memberships only; no Owner-only invitations/enrollment                      |
+| Branch Manager          | Employee/branch/classroom/group/enrollment management in assigned branches; shared catalog read; no salary access by default       |
+| Sales Manager / Cashier | Existing sales/finance permissions within assigned branches                                                                        |
+| Teacher                 | Shared catalog, branch rooms and assigned-group limited rosters; no academic management, agreed tuition or financial/salary grants |
+| Employee / legacy Staff | Assigned active branch access; no HR/salary/role management by default                                                             |
+| Custom role             | Explicit grants in its business or assigned branches                                                                               |
 
 Branch overrides replace branch-scoped defaults; business-wide grants remain global within that tenant. Different branches' permissions are never merged to authorize an operation elsewhere. An employee shared across branches requires the operation in **every assigned branch**, or business-wide permission. Unassigned employees require global permission. Changes check all old/new branches. Linked login assignment changes additionally require `roles.manage`.
 
