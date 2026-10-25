@@ -3,16 +3,19 @@ import { localDateTime } from "@/lib/time.mjs";
 import type { LessonRow } from "@/features/academics/scheduling-types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import type { Closure } from "@/features/academics/calendar-types";
 export function Timetable({
   days,
   rows,
   zone,
   view,
+  closures = [],
 }: {
   days: string[];
   rows: LessonRow[];
   zone: string;
   view: string;
+  closures?: Closure[];
 }) {
   return (
     <div
@@ -46,6 +49,29 @@ export function Timetable({
                 day: "numeric",
               }).format(new Date(day + "T00:00:00Z"))}
             </h2>
+            {closures
+              .filter((c) => {
+                if (!c.starts_at || !c.ends_at) return false;
+                const start = localDateTime(c.starts_at, zone),
+                  end = localDateTime(c.ends_at, zone);
+                return (
+                  start.slice(0, 10) <= day &&
+                  (end.slice(0, 10) > day ||
+                    (end.slice(0, 10) === day && end.slice(11) > "00:00"))
+                );
+              })
+              .map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/scheduling/closures/${c.id}`}
+                  className="block rounded-lg border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900"
+                >
+                  Non-teaching: {c.name}
+                  <span className="mt-1 block">
+                    {c.branch_name ?? "Whole business"}
+                  </span>
+                </Link>
+              ))}
             {events.map((l) => (
               <Link
                 key={l.id}

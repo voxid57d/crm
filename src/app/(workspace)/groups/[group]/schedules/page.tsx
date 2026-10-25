@@ -59,6 +59,9 @@ export default async function Schedules({
         )}
       </div>
       <div className="flex flex-wrap gap-3 text-sm text-primary">
+        <Link className="underline" href={`/groups/${id}/schedules/exceptions`}>
+          One-off occurrence exceptions
+        </Link>
         <Link className="underline" href={`/lessons?group=${id}`}>
           Group lessons
         </Link>
@@ -76,8 +79,16 @@ export default async function Schedules({
           </p>
           <p>
             {batch.created_count} created · {batch.existing_count} existing
-            occurrences retained · {batch.past_count} past starts skipped
+            occurrences retained · {batch.past_count} past starts skipped ·{" "}
+            {batch.closure_count} closure skips · {batch.exception_count}{" "}
+            occurrence exceptions
           </p>
+          <Link
+            className="text-primary underline"
+            href={`/scheduling/generation/${batch.id}`}
+          >
+            View retained generation receipt and skip details
+          </Link>
           <p>{academicDate(batch.created_at, w.tenant.timezone)}</p>
         </div>
       )}

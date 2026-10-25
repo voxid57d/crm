@@ -19,7 +19,9 @@ type IdFunction =
   | "save_study_group"
   | "save_group_schedule"
   | "save_lesson"
-  | "save_classroom";
+  | "save_classroom"
+  | "save_academic_closure"
+  | "save_schedule_exception";
 type NullableId<K extends IdFunction> = Omit<Functions[K], "Args"> & {
   Args: Omit<Functions[K]["Args"], "p_id"> & { p_id: string | null };
 };
@@ -32,9 +34,19 @@ export type Database = Omit<GeneratedDatabase, "public"> & {
       | "save_invoice_draft"
       | "save_student"
       | "set_group_teachers"
+      | "academic_calendar_history"
     > & {
       [K in IdFunction]: NullableId<K>;
     } & {
+      academic_calendar_history: Omit<
+        Functions["academic_calendar_history"],
+        "Args"
+      > & {
+        Args: Omit<
+          Functions["academic_calendar_history"]["Args"],
+          "p_closure" | "p_exception"
+        > & { p_closure: string | null; p_exception: string | null };
+      };
       set_group_teachers: Omit<Functions["set_group_teachers"], "Args"> & {
         Args: Omit<Functions["set_group_teachers"]["Args"], "p_primary"> & {
           p_primary: string | null;

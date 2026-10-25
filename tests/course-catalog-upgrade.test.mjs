@@ -10,8 +10,9 @@ for (const phase of ["7A", "7B", "7C", "7D", "8A"])
         .filter(
           (f) =>
             f.endsWith(".sql") &&
-            (phase === "8A" ||
-              f <
+            (phase === "8A"
+              ? f < "20261026000800"
+              : f <
                 (phase === "7D"
                   ? "20261026000400"
                   : phase === "7C"

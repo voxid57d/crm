@@ -28,6 +28,10 @@ const labels: Record<string, string> = {
   teachers: "Teachers",
   title: "Lesson title / topic",
   timezone: "Timezone",
+  from_date: "Closure starts",
+  to_date: "Closure ends (inclusive)",
+  occurrence_date: "Weekly occurrence date",
+  reason: "Calendar reason",
   weekday: "Weekday (Monday = 1)",
   start_time: "Local start",
   end_time: "Local end",
@@ -67,12 +71,14 @@ export function AcademicHistoryPanel({
   path,
   page,
   title = "Configuration history",
+  filters = {},
 }: {
   history: AcademicHistory;
   zone: string;
   path: string;
   page: number;
   title?: string;
+  filters?: Record<string, string>;
 }) {
   return (
     <section className="space-y-4">
@@ -122,7 +128,7 @@ export function AcademicHistoryPanel({
         path={path}
         page={page}
         pageKey="history_page"
-        filters={{}}
+        filters={filters}
         total={history.total}
       />
     </section>

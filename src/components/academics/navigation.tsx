@@ -5,6 +5,15 @@ export function AcademicNavigation() {
       aria-label="Education navigation"
       className="flex flex-wrap gap-4 border-b pb-4 text-sm text-primary"
     >
+      <Link
+        className="underline underline-offset-4"
+        href="/scheduling/closures"
+      >
+        Non-teaching dates
+      </Link>
+      <Link className="underline underline-offset-4" href="/scheduling/changes">
+        Schedule changes
+      </Link>
       <Link className="underline underline-offset-4" href="/academics">
         Academic overview
       </Link>

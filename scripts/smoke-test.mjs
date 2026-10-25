@@ -19,6 +19,12 @@ for (const [route, content] of publicRoutes) {
   console.log("PASS public " + route);
 }
 const protectedRoutes = [
+  "/scheduling/closures",
+  "/scheduling/closures/new",
+  "/scheduling/closures/00000000-0000-0000-0000-000000000001",
+  "/scheduling/changes",
+  "/scheduling/generation/00000000-0000-0000-0000-000000000001",
+  "/groups/00000000-0000-0000-0000-000000000001/schedules/exceptions",
   "/attendance",
   "/attendance/history",
   "/lessons/00000000-0000-0000-0000-000000000001/attendance",

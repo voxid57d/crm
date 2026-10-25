@@ -15,6 +15,7 @@ import {
 } from "@/components/academics/timetable";
 import { LessonFilters } from "@/components/academics/lesson-filters";
 import { Button } from "@/components/ui/button";
+import { closureDirectory } from "@/features/academics/calendar-queries";
 export const metadata = { title: "Academic timetable" };
 export default async function Calendar({
   searchParams,
@@ -44,6 +45,19 @@ export default async function Calendar({
   const filters: Record<string, string> = { ...d.filters, date, view };
   delete filters.from;
   delete filters.to;
+  const closureBranch =
+    d.filters.branch ||
+    options.groups.find((g) => g.id === d.filters.group)?.branch_id ||
+    "";
+  const closures = await closureDirectory(
+    {
+      from: period.from,
+      to: period.to,
+      branch: closureBranch,
+      closure_page: search.closure_page,
+    },
+    true,
+  );
   const periodHref = (dateValue: string) =>
     "/timetable?" +
     new URLSearchParams({ ...filters, date: dateValue, page: "0" });
@@ -98,11 +112,40 @@ export default async function Calendar({
         total={d.total}
         size={d.page_size}
       />
+      <p className="text-sm text-muted-foreground">
+        {closures.total} authorized active non-teaching periods overlap this
+        view. Calendar badges show up to 200 per closure page. Existing lesson
+        events are retained for explicit review.{" "}
+        <Link className="text-primary underline" href="/scheduling/closures">
+          Open non-teaching calendar
+        </Link>
+      </p>
+      {closures.total > 200 && (
+        <div className="flex gap-4 text-sm text-primary">
+          {closures.page > 0 && (
+            <Link
+              className="underline"
+              href={`/timetable?${new URLSearchParams({ ...filters, closure_page: String(closures.page - 1) })}`}
+            >
+              Previous closure page
+            </Link>
+          )}
+          {(closures.page + 1) * 200 < closures.total && (
+            <Link
+              className="underline"
+              href={`/timetable?${new URLSearchParams({ ...filters, closure_page: String(closures.page + 1) })}`}
+            >
+              Next closure page
+            </Link>
+          )}
+        </div>
+      )}
       <Timetable
         days={period.days}
         rows={d.rows}
         zone={w.tenant.timezone}
         view={view}
+        closures={closures.rows}
       />
     </div>
   );

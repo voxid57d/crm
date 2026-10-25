@@ -1,6 +1,33 @@
-# Verification record — 26 October 2026 (through Step 8A)
+# Verification record — 26 October 2026 (through Step 8B)
 
-## Step 8A: current verification
+## Step 8B: current verification
+
+Started from clean attendance commit `2c9b6cb`. Inspected the existing schema, scheduling/attendance commands and authorization, pages, configuration and tests before writing code. Read the installed Next.js Server Actions/data-security guides. All **241 baseline portable tests** passed and local Auth/Login responded on ports 54321/3000. Used existing local Docker/Supabase records and the running development server. No reset, dependency/environment addition, hosted connection, production credential, remote push or deployment was introduced.
+
+| Check                   | Actual result                                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `npm run check`         | Passed: ESLint, strict TypeScript, **254 portable tests**, optimized production build                         |
+| New real calendar suite | **9 tests passed**, real local Auth/API and rendered forms, including closure edits and exception restoration |
+| Full live regression    | **129 tests passed across 15 parent suites**, zero failures, real local Auth/API and rendered forms           |
+| Route smoke checks      | **109 protected routes passed**, plus public/home/platform/callback boundaries                                |
+| Formatting/whitespace   | Whole-project Prettier and Git whitespace checks passed                                                       |
+| `npm run db:test`       | **323 assertions passed across 17 native PostgreSQL suites**, fixtures rolled back                            |
+| `npm run db:lint`       | No new issues; only the pre-existing unused `m` warning in `public.save_employee` remains                     |
+| Migrations/types        | Five additive migrations applied locally; types regenerated from the actual local database                    |
+
+The [8B guide](advanced-scheduling.md) records the schema, permissions, timezone/generation semantics, local walkthrough and remaining scope. Four RLS tables retain closures, single-series/date exceptions, immutable calendar audit and normalized generation skips; generation batches gain closure/exception counts. New scoped `schedules.manage_holidays` grants use the existing permission engine. Branch Managers cannot authorize whole-business changes by combining branch assignments. Existing lesson, employee, enrollment, student/contact, attendance and finance identities remain authoritative.
+
+Portable tests cover current/future definitions, stale updates, actor/payload-bound retries, closure and exception priority/counts, immutable replay receipts, retained cancelled/rescheduled roots, original/replacement linkage, exact midnight adjacency, overnight intervals and retained timezone boundaries. Reopening dates rechecks concrete and weekly group/teacher/classroom reservations, including teachers across branches and rooms occupied by another teacher. Failed restoration rolls back version/state/audit. Teacher/Manager/Employee/foreign/subjectless/anonymous isolation, direct-write denial, forged IDs and pagination beyond 20 are exercised. The separate populated 8B upgrade test verifies complete record hashes, finalized attendance and exact posted financial profiles before/after migration and closure creation.
+
+Native PostgreSQL adds 32 assertions for actual RLS/grants, real invited Teacher scope, business/branch permissions, checked calendar commands, generation counts/skips/replay, immutable retained sources, explicit cancellation metadata, stale versions, disabled-closure regeneration, foreign/subjectless reads and no fabricated attendance or financial postings. Deferred constraints were forced immediate.
+
+The focused live tests submit actual closure, exception, generation, rescheduling and cancellation forms and inspect saved records, main day/week/month closure badges, retained lessons, receipts and authorized change feeds. Concurrent reopening versus cross-branch teacher booking allows exactly one winner. Concurrent generation versus closure creation produces either one retained lesson or one recorded skip. Forged parent group IDs are rejected by the server action and database authorization remains authoritative. The existing issued invoice/payment/allocation/debt/credit profile is unchanged.
+
+No new manual installation/configuration is required on this machine. Start Docker Desktop and run `npm run db:start`, `npm run db:migrate`, `npm run dev` if stopped, then open <http://127.0.0.1:3000/scheduling/closures>. Native fixtures roll back; isolated real local live-test businesses/accounts remain for inspection.
+
+Browser visuals/mobile/keyboard/focus and native confirmation interactions remain manual, as do production-size load, deployment and earlier recovery-link redemption/sales dragging/print layouts. The scheduling feed is an in-app read view, not a notification delivery system. Rescheduling is for upcoming lessons; completed clocks remain immutable and finalized attendance still blocks cancellation/rescheduling. Make-ups, actual-delivery extensions, attendance rates/reports/CSV/full Student Profile summaries, automated finance/payroll and external messaging are not implemented. Step 8C is next and has not started.
+
+## Step 8A: historical verification
 
 Started from clean commit `855556c`. Inspected shared contact/Student Profile and guardian identity, employee/teacher eligibility, branch permissions, enrollments and immutable audit snapshots, lesson lifecycle and frozen expectations, scheduling conflicts/rescheduling, financial links, UI components and actual migrations/tests. Read installed Next.js Server Actions/data-security guidance before code. Local Auth and app health responded on ports 54321/3000 and all **225 baseline portable tests** passed. No reset, dependency/environment addition, production credential, hosted connection or deployment was used.
 

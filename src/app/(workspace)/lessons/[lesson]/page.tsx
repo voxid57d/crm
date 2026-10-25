@@ -10,6 +10,7 @@ import { AcademicHistoryPanel } from "@/components/academics/history";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FinancePagination as Pagination } from "@/components/finance/pagination";
+import { lessonCalendarContext } from "@/features/academics/calendar-queries";
 export const metadata = { title: "Lesson details" };
 export default async function LessonProfile({
   params,
@@ -33,6 +34,7 @@ export default async function LessonProfile({
     throw new Error(
       "Attendance access could not load. Check local migrations and services.",
     );
+  const calendar = await lessonCalendarContext(id);
   return (
     <div className="space-y-6">
       <Link href="/lessons" className="text-primary underline">
@@ -81,6 +83,42 @@ export default async function LessonProfile({
         )}
       </div>
       <section className="space-y-5 rounded-xl border bg-white p-5">
+        {calendar.blocked && (
+          <div className="space-y-2 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+            <p>
+              This retained lesson overlaps an active non-teaching period.
+              Review it explicitly; new or moved bookings cannot overlap the
+              closure.
+            </p>
+            {calendar.closures.map((c) => (
+              <p key={c.id}>
+                <Link
+                  className="underline"
+                  href={`/scheduling/closures/${c.id}`}
+                >
+                  {c.name} · {c.from_date} → {c.to_date} · {c.timezone}
+                </Link>
+              </p>
+            ))}
+          </div>
+        )}
+        {calendar.cancellation && (
+          <div className="space-y-2 rounded-lg border p-4 text-sm">
+            <h2 className="font-semibold">Cancellation record</h2>
+            <p>
+              {calendar.cancellation.by} ·{" "}
+              {academicDate(calendar.cancellation.at, w.tenant.timezone)} ·
+              Previous status: {calendar.cancellation.previous_status}
+            </p>
+            <p>{calendar.cancellation.reason}</p>
+          </div>
+        )}
+        {calendar.has_finalized_attendance && (
+          <p className="text-sm text-muted-foreground">
+            Finalized attendance is retained. This lesson cannot be cancelled or
+            rescheduled through ordinary scheduling actions.
+          </p>
+        )}
         <h2 className="text-xl font-semibold">Lesson information</h2>
         <dl className="grid gap-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
           {[
@@ -192,7 +230,13 @@ export default async function LessonProfile({
           </p>
         )}
       </section>
-      <LessonStatusForm tenantId={w.tenant.id} detail={d} />
+      <LessonStatusForm
+        tenantId={w.tenant.id}
+        detail={{
+          ...d,
+          can_cancel: d.can_cancel && !calendar.has_finalized_attendance,
+        }}
+      />
       <AcademicHistoryPanel
         title="Lesson history"
         history={d.history}

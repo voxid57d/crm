@@ -18,6 +18,9 @@ function fail(e: unknown): ActionState {
 }
 function rejected(e: { code?: string; message: string }): ActionState {
   const known = [
+    "Non-teaching date conflict",
+    "Weekly occurrence is explicitly skipped",
+    "Finalized attendance prevents",
     "Ambiguous",
     "Choose a valid",
     "Choose an active",
@@ -101,6 +104,7 @@ function refresh() {
     "/students",
     "/customers",
     "/attendance",
+    "/scheduling",
   ])
     revalidatePath(path, "layout");
 }

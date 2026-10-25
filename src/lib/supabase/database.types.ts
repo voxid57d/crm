@@ -9,6 +9,128 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      academic_calendar_events: {
+        Row: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data: Json | null;
+          closure_id: string | null;
+          created_at: string;
+          exception_id: string | null;
+          id: string;
+          operation: string;
+          reason: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data?: Json | null;
+          closure_id?: string | null;
+          created_at?: string;
+          exception_id?: string | null;
+          id?: string;
+          operation: string;
+          reason: string;
+          tenant_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          actor_name?: string;
+          after_data?: NonNullable<Json>;
+          before_data?: Json | null;
+          closure_id?: string | null;
+          created_at?: string;
+          exception_id?: string | null;
+          id?: string;
+          operation?: string;
+          reason?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "academic_calendar_events_tenant_id_closure_id_fkey";
+            columns: ["tenant_id", "closure_id"];
+            isOneToOne: false;
+            referencedRelation: "academic_closures";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "academic_calendar_events_tenant_id_exception_id_fkey";
+            columns: ["tenant_id", "exception_id"];
+            isOneToOne: false;
+            referencedRelation: "group_schedule_exceptions";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      academic_closures: {
+        Row: {
+          branch_id: string | null;
+          created_at: string;
+          created_by: string;
+          from_date: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          reason: string;
+          tenant_id: string;
+          timezone: string;
+          to_date: string;
+          updated_at: string;
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id?: string | null;
+          created_at?: string;
+          created_by: string;
+          from_date: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          reason: string;
+          tenant_id: string;
+          timezone: string;
+          to_date: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Update: {
+          branch_id?: string | null;
+          created_at?: string;
+          created_by?: string;
+          from_date?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          reason?: string;
+          tenant_id?: string;
+          timezone?: string;
+          to_date?: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "academic_closures_tenant_id_branch_id_fkey";
+            columns: ["tenant_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "academic_closures_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       academic_configuration_events: {
         Row: {
           actor_id: string;
@@ -1738,6 +1860,60 @@ export type Database = {
           },
         ];
       };
+      group_schedule_exceptions: {
+        Row: {
+          branch_id: string;
+          created_at: string;
+          created_by: string;
+          group_id: string;
+          id: string;
+          is_active: boolean;
+          occurrence_date: string;
+          reason: string;
+          series_id: string;
+          tenant_id: string;
+          updated_at: string;
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          created_at?: string;
+          created_by: string;
+          group_id: string;
+          id?: string;
+          is_active?: boolean;
+          occurrence_date: string;
+          reason: string;
+          series_id: string;
+          tenant_id: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Update: {
+          branch_id?: string;
+          created_at?: string;
+          created_by?: string;
+          group_id?: string;
+          id?: string;
+          is_active?: boolean;
+          occurrence_date?: string;
+          reason?: string;
+          series_id?: string;
+          tenant_id?: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "group_schedule_exceptions_tenant_id_series_id_group_id_bra_fkey";
+            columns: ["tenant_id", "series_id", "group_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "group_schedule_series";
+            referencedColumns: ["tenant_id", "id", "group_id", "branch_id"];
+          },
+        ];
+      };
       group_schedule_series: {
         Row: {
           branch_id: string;
@@ -2790,9 +2966,11 @@ export type Database = {
       lesson_generation_batches: {
         Row: {
           branch_id: string;
+          closure_count: number;
           created_at: string;
           created_by: string;
           created_count: number;
+          exception_count: number;
           existing_count: number;
           from_date: string;
           group_id: string;
@@ -2804,9 +2982,11 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           branch_id: string;
+          closure_count?: number;
           created_at?: string;
           created_by: string;
           created_count: number;
+          exception_count?: number;
           existing_count: number;
           from_date: string;
           group_id: string;
@@ -2817,9 +2997,11 @@ export type Database = {
         };
         Update: {
           branch_id?: string;
+          closure_count?: number;
           created_at?: string;
           created_by?: string;
           created_count?: number;
+          exception_count?: number;
           existing_count?: number;
           from_date?: string;
           group_id?: string;
@@ -2835,6 +3017,90 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "study_groups";
             referencedColumns: ["tenant_id", "id", "branch_id"];
+          },
+        ];
+      };
+      lesson_generation_skips: {
+        Row: {
+          batch_id: string;
+          branch_id: string;
+          closure_id: string | null;
+          exception_id: string | null;
+          group_id: string;
+          id: string;
+          occurrence_date: string;
+          reason: string;
+          series_id: string;
+          slot_id: string;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          batch_id: string;
+          branch_id: string;
+          closure_id?: string | null;
+          exception_id?: string | null;
+          group_id: string;
+          id?: string;
+          occurrence_date: string;
+          reason: string;
+          series_id: string;
+          slot_id: string;
+          tenant_id: string;
+        };
+        Update: {
+          batch_id?: string;
+          branch_id?: string;
+          closure_id?: string | null;
+          exception_id?: string | null;
+          group_id?: string;
+          id?: string;
+          occurrence_date?: string;
+          reason?: string;
+          series_id?: string;
+          slot_id?: string;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lesson_generation_skips_tenant_id_batch_id_fkey";
+            columns: ["tenant_id", "batch_id"];
+            isOneToOne: false;
+            referencedRelation: "lesson_generation_batches";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "lesson_generation_skips_tenant_id_closure_id_fkey";
+            columns: ["tenant_id", "closure_id"];
+            isOneToOne: false;
+            referencedRelation: "academic_closures";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "lesson_generation_skips_tenant_id_exception_id_fkey";
+            columns: ["tenant_id", "exception_id"];
+            isOneToOne: false;
+            referencedRelation: "group_schedule_exceptions";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "lesson_generation_skips_tenant_id_slot_id_series_id_group__fkey";
+            columns: [
+              "tenant_id",
+              "slot_id",
+              "series_id",
+              "group_id",
+              "branch_id",
+            ];
+            isOneToOne: false;
+            referencedRelation: "group_schedule_slots";
+            referencedColumns: [
+              "tenant_id",
+              "id",
+              "series_id",
+              "group_id",
+              "branch_id",
+            ];
           },
         ];
       };
@@ -3930,6 +4196,28 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      academic_calendar_history: {
+        Args: {
+          p_closure: string;
+          p_exception: string;
+          p_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      academic_closure_details: {
+        Args: { p_closure: string; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
+      academic_closure_directory: {
+        Args: {
+          p_calendar?: boolean;
+          p_filters: Json;
+          p_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
       academic_configuration_history: {
         Args: {
           p_id: string;
@@ -4053,6 +4341,10 @@ export type Database = {
       };
       classroom_directory: {
         Args: { p_filters?: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
+      closure_lesson_impact: {
+        Args: { p_closure: string; p_page?: number; p_tenant: string };
         Returns: Json;
       };
       complete_lead_followup: {
@@ -4303,6 +4595,10 @@ export type Database = {
         Args: { p_batch: string; p_tenant: string };
         Returns: Json;
       };
+      generation_skip_directory: {
+        Args: { p_batch: string; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
       get_employee_salary: {
         Args: { p_employee: string; p_tenant: string };
         Returns: Json;
@@ -4385,6 +4681,14 @@ export type Database = {
           phone: string;
           status: string;
         }[];
+      };
+      lesson_calendar_context: {
+        Args: { p_lesson: string; p_tenant: string };
+        Returns: Json;
+      };
+      lesson_change_directory: {
+        Args: { p_filters: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
       };
       lesson_details: {
         Args: { p_history_page?: number; p_lesson: string; p_tenant: string };
@@ -4583,6 +4887,16 @@ export type Database = {
         Args: { p_filters?: Json; p_page?: number; p_tenant: string };
         Returns: Json;
       };
+      save_academic_closure: {
+        Args: {
+          p_data: Json;
+          p_id: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
       save_attendance_marks: {
         Args: {
           p_correct?: boolean;
@@ -4766,6 +5080,16 @@ export type Database = {
         Args: { p_data: Json; p_id: string; p_kind: string; p_tenant: string };
         Returns: string;
       };
+      save_schedule_exception: {
+        Args: {
+          p_data: Json;
+          p_id: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
       save_student: {
         Args: {
           p_branches: string[];
@@ -4803,6 +5127,10 @@ export type Database = {
           p_version: number;
         };
         Returns: string;
+      };
+      schedule_exception_directory: {
+        Args: { p_group: string; p_page?: number; p_tenant: string };
+        Returns: Json;
       };
       scheduling_history: {
         Args: {

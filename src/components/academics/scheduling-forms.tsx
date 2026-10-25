@@ -248,7 +248,9 @@ export function GenerationForm({
       <p className="text-sm text-muted-foreground">
         Generate up to 31 days per request. Dates follow each slot&apos;s
         timezone. Past start times are skipped; existing occurrences are reused.
-        A conflict rejects the whole batch, with no partial generation.
+        A conflict rejects the whole batch, with no partial generation. Active
+        closures and one-off weekly exceptions are counted as explicit skips;
+        previously generated lessons are never cancelled automatically.
       </p>
     </ActionForm>
   );
