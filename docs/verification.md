@@ -1,6 +1,34 @@
-﻿# Verification record — 24 October 2026 (through Step 6F)
+# Verification record — 25 October 2026 (through Step 7A)
 
-## Step 6F: current verification
+## Step 7A: current verification
+
+Inspected the existing migrations, student/customer/guardian identities, conversion and financial links, roles/branch assignments, UI and test infrastructure before implementation. Read the installed Next.js data-security and Server Actions guides. Baseline: 165 portable tests, 151 native assertions and the ten-test student-first live suite passed. Docker Desktop and the app were started locally with retained data; no database reset or hosted connection was used. The [course/classroom guide](lms-course-catalog.md) documents the inspection, implementation contract and manual walkthrough.
+
+| Check                      | Final result                                                                                   |
+| -------------------------- | ---------------------------------------------------------------------------------------------- |
+| `npm run check`            | Passed: ESLint, strict TypeScript, **178 portable tests**, optimized local production build    |
+| `npm run test:integration` | **74 tests passed in 10 suites**, real local Auth/PostgREST/Storage and rendered Next.js forms |
+| `npm run db:test`          | **173 assertions passed in 12 native PostgreSQL suites**, fixtures rolled back                 |
+| `npm run test:smoke`       | **79 protected routes passed**, plus public/home/platform/callback boundaries                  |
+| `npm run db:lint`          | No new issues; existing unused variable `m` warning in `public.save_employee` remains          |
+| Migrations/types           | Three additive 7A migrations applied locally; actual local schema types regenerated            |
+| Formatting/whitespace      | Prettier and Git diff whitespace checks passed                                                 |
+
+Portable academic tests exercise create/edit/archive/reactivate, settings uniqueness/inactive reference retention, exact price strings beyond JavaScript safe integers, free courses, invalid decimal/duration/capacity rollback, fixed classroom branches, stale versions, safe retries, immutable identity/history, literal search, numeric sorting and pagination. Owner/Admin/Manager/Teacher/Employee/foreign/subjectless cases cover shared tenant catalog reads versus business-wide writes and actual-branch room access. Even an explicit branch `courses.manage` grant cannot authorize tenant-wide changes. Academic permissions expose no additional finance or salary information.
+
+A populated pre-7A upgrade test creates a guardian-linked student, an employee with exact salary configuration, a converted lead and an issued invoice with partial payment/credit. It compares complete record hashes before/after migration and again after course creation/price editing and room creation. Customer/student/guardian identities, sales conversion, employee/salary settings, financial sources/allocations/receivables/ledger/audit and exact debt/credit remain unchanged. No groups, enrollments or lessons are introduced.
+
+Native PostgreSQL independently checks RLS and grants, exact price strings, request replay, stale updates, archive filters/history, persisted capacity, immutable branch scope, Teacher read-only and finance/salary restrictions, foreign IDs and subjectless denial. New live tests submit real rendered forms for category/level/course/classroom management, check saved prices/references, stale/invalid/duplicate submissions, actual filters, archive/reactivation and history. They verify branch-limited Manager/Teacher access, forged tenant/branch/resource forms, anonymous reads and cross-business metadata isolation. Concurrent identical course requests return one course; competing classroom edits produce one success and one version conflict. All preceding student, Auth/employee, customer, sales and financial live suites pass.
+
+Initial test development exposed two fixture/assertion mistakes, now corrected: upgrade migrations must run after restoring the database migration role; authorization denial can correctly return a resource-hiding 404, and confidential invoice tables intentionally have no raw SELECT grant. Final runs have zero failing tests. No app permission was loosened to accommodate tests.
+
+Changed areas: new `src/features/academics` queries/actions/types, reusable `src/components/academics`, protected `/courses/*` and `/classrooms/*` routes, existing navigation/breadcrumbs/dashboard course link and old-module redirect, generated schema types, three migrations, native/portable/upgrade/live tests, route smoke coverage, README and the course/classroom guide. No dependency or environment variable was added. No student/finance identity or existing transaction source was rewritten. No deployment or remote push was performed.
+
+No new manual installation/configuration is required on this configured machine. For restart: start Docker Desktop, `npm run db:start`, `npm run db:migrate`, `npm run dev`; open <http://127.0.0.1:3000>. Add your own category/level/course and physical room through the UI. All retained live fixtures are real isolated local test accounts/businesses, not app runtime mock data. Never reset the database to apply this increment.
+
+Remaining unverified: visual/mobile/keyboard/focus behavior, browser-native confirmations, recovery-link redemption, earlier sales dragging/print layout and production-size load. Only server-rendered content, real form actions, persistence and authorization were automated. Groups, teachers/enrollments, schedules/lessons, academic dashboard and invoice integration belong to 7B–7D. Future enrollments must reuse the existing student profile/customer identity and snapshot agreed prices; future billing must reuse existing finance services. Guardian-as-debtor/structured third-party payer support remains a separate enhancement. Await user instruction before 7B.
+
+## Step 6F: historical verification
 
 The actual architecture and plan were documented before implementation in [student-first.md](student-first.md). The initial tree was clean. Docker Desktop and the dev server were stopped; both were started locally with retained data. No dependency, hosted connection, database reset or bulk identity conversion was introduced.
 

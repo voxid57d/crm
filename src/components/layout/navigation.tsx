@@ -29,7 +29,8 @@ const groups = [
     label: "LEARNING",
     links: [
       { href: "/students", label: "Students", icon: GraduationCap },
-      { href: "/modules/courses", label: "Courses & groups", icon: BookOpen },
+      { href: "/courses", label: "Courses", icon: BookOpen },
+      { href: "/classrooms", label: "Classrooms", icon: Building2 },
       { href: "/modules/schedule", label: "Schedule", icon: CalendarDays },
       { href: "/modules/attendance", label: "Attendance", icon: CheckSquare2 },
     ],

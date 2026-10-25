@@ -7,8 +7,9 @@ export const modules = [
   },
   {
     slug: "courses",
-    title: "Courses & groups",
-    description: "Course catalogs, learning groups, and teacher assignments.",
+    title: "Courses",
+    description:
+      "Shared course catalog, categories, levels and tuition templates.",
     category: "Learning",
   },
   {

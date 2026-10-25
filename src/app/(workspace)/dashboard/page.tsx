@@ -143,8 +143,8 @@ export default async function DashboardPage() {
           Build your workspace, step by step
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Customer and student profiles are available. Course, schedule, and
-          attendance workflows will follow.
+          Student profiles, the course catalog and classrooms are available.
+          Groups, schedules and attendance workflows will follow.
         </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {modules.slice(0, 4).map((entry) => (
@@ -153,7 +153,9 @@ export default async function DashboardPage() {
               href={
                 entry.slug === "students"
                   ? "/students"
-                  : "/modules/" + entry.slug
+                  : entry.slug === "courses"
+                    ? "/courses"
+                    : "/modules/" + entry.slug
               }
               className="rounded-xl border bg-white p-5 hover:border-primary/40"
             >
@@ -162,7 +164,11 @@ export default async function DashboardPage() {
                 {entry.description}
               </p>
               <span className="mt-4 block text-xs text-muted-foreground">
-                {entry.slug === "students" ? "Open students" : "Planned module"}
+                {entry.slug === "students"
+                  ? "Open students"
+                  : entry.slug === "courses"
+                    ? "Open courses"
+                    : "Planned module"}
               </span>
             </Link>
           ))}

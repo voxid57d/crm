@@ -9,6 +9,93 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      academic_configuration_events: {
+        Row: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data: Json | null;
+          branch_id: string | null;
+          category_id: string | null;
+          classroom_id: string | null;
+          course_id: string | null;
+          created_at: string;
+          id: string;
+          level_id: string | null;
+          operation: string;
+          reason: string;
+          request_id: string;
+          request_payload: NonNullable<Json>;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data?: Json | null;
+          branch_id?: string | null;
+          category_id?: string | null;
+          classroom_id?: string | null;
+          course_id?: string | null;
+          created_at?: string;
+          id?: string;
+          level_id?: string | null;
+          operation: string;
+          reason?: string;
+          request_id: string;
+          request_payload: NonNullable<Json>;
+          tenant_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          actor_name?: string;
+          after_data?: NonNullable<Json>;
+          before_data?: Json | null;
+          branch_id?: string | null;
+          category_id?: string | null;
+          classroom_id?: string | null;
+          course_id?: string | null;
+          created_at?: string;
+          id?: string;
+          level_id?: string | null;
+          operation?: string;
+          reason?: string;
+          request_id?: string;
+          request_payload?: NonNullable<Json>;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "academic_configuration_events_tenant_id_category_id_fkey";
+            columns: ["tenant_id", "category_id"];
+            isOneToOne: false;
+            referencedRelation: "course_categories";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "academic_configuration_events_tenant_id_classroom_id_branc_fkey";
+            columns: ["tenant_id", "classroom_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "classrooms";
+            referencedColumns: ["tenant_id", "id", "branch_id"];
+          },
+          {
+            foreignKeyName: "academic_configuration_events_tenant_id_course_id_fkey";
+            columns: ["tenant_id", "course_id"];
+            isOneToOne: false;
+            referencedRelation: "courses";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "academic_configuration_events_tenant_id_level_id_fkey";
+            columns: ["tenant_id", "level_id"];
+            isOneToOne: false;
+            referencedRelation: "course_levels";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
       branch_memberships: {
         Row: {
           branch_id: string;
@@ -295,6 +382,234 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "tenants";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      classrooms: {
+        Row: {
+          branch_id: string;
+          capacity: number;
+          created_at: string;
+          created_by: string;
+          description: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          tenant_id: string;
+          updated_at: string;
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          capacity: number;
+          created_at?: string;
+          created_by: string;
+          description?: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          tenant_id: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Update: {
+          branch_id?: string;
+          capacity?: number;
+          created_at?: string;
+          created_by?: string;
+          description?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          tenant_id?: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "classrooms_tenant_id_branch_id_fkey";
+            columns: ["tenant_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "branches";
+            referencedColumns: ["tenant_id", "id"];
+          },
+        ];
+      };
+      course_categories: {
+        Row: {
+          created_at: string;
+          created_by: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          tenant_id: string;
+          updated_at: string;
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          created_by: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          tenant_id: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          tenant_id?: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "course_categories_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      course_levels: {
+        Row: {
+          created_at: string;
+          created_by: string;
+          id: string;
+          is_active: boolean;
+          name: string;
+          tenant_id: string;
+          updated_at: string;
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          created_by: string;
+          id?: string;
+          is_active?: boolean;
+          name: string;
+          tenant_id: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string;
+          id?: string;
+          is_active?: boolean;
+          name?: string;
+          tenant_id?: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "course_levels_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      courses: {
+        Row: {
+          category_id: string | null;
+          code: string | null;
+          created_at: string;
+          created_by: string;
+          currency: string;
+          description: string;
+          duration_unit: string;
+          duration_value: number | null;
+          id: string;
+          is_active: boolean;
+          lesson_duration_minutes: number | null;
+          level_id: string | null;
+          name: string;
+          pricing_model: string;
+          standard_price: number;
+          tenant_id: string;
+          updated_at: string;
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          category_id?: string | null;
+          code?: string | null;
+          created_at?: string;
+          created_by: string;
+          currency?: string;
+          description?: string;
+          duration_unit?: string;
+          duration_value?: number | null;
+          id?: string;
+          is_active?: boolean;
+          lesson_duration_minutes?: number | null;
+          level_id?: string | null;
+          name: string;
+          pricing_model: string;
+          standard_price: number;
+          tenant_id: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Update: {
+          category_id?: string | null;
+          code?: string | null;
+          created_at?: string;
+          created_by?: string;
+          currency?: string;
+          description?: string;
+          duration_unit?: string;
+          duration_value?: number | null;
+          id?: string;
+          is_active?: boolean;
+          lesson_duration_minutes?: number | null;
+          level_id?: string | null;
+          name?: string;
+          pricing_model?: string;
+          standard_price?: number;
+          tenant_id?: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "courses_currency_fkey";
+            columns: ["currency"];
+            isOneToOne: false;
+            referencedRelation: "finance_currencies";
+            referencedColumns: ["code"];
+          },
+          {
+            foreignKeyName: "courses_tenant_id_category_id_fkey";
+            columns: ["tenant_id", "category_id"];
+            isOneToOne: false;
+            referencedRelation: "course_categories";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "courses_tenant_id_fkey";
+            columns: ["tenant_id"];
+            isOneToOne: false;
+            referencedRelation: "tenants";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "courses_tenant_id_level_id_fkey";
+            columns: ["tenant_id", "level_id"];
+            isOneToOne: false;
+            referencedRelation: "course_levels";
+            referencedColumns: ["tenant_id", "id"];
           },
         ];
       };
@@ -2535,6 +2850,15 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      academic_configuration_history: {
+        Args: {
+          p_id: string;
+          p_kind: string;
+          p_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
       accept_employee_invitation: {
         Args: { p_token: string };
         Returns: string;
@@ -2597,6 +2921,18 @@ export type Database = {
         Args: { p_filters?: Json; p_page?: number; p_tenant: string };
         Returns: Json;
       };
+      classroom_details: {
+        Args: {
+          p_classroom: string;
+          p_history_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      classroom_directory: {
+        Args: { p_filters?: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
       complete_lead_followup: {
         Args: { p_followup: string; p_outcome: string; p_tenant: string };
         Returns: undefined;
@@ -2621,6 +2957,15 @@ export type Database = {
           p_tenant: string;
         };
         Returns: string;
+      };
+      course_catalog_options: { Args: { p_tenant: string }; Returns: Json };
+      course_details: {
+        Args: { p_course: string; p_history_page?: number; p_tenant: string };
+        Returns: Json;
+      };
+      course_directory: {
+        Args: { p_filters?: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
       };
       create_business: {
         Args: {
@@ -2974,6 +3319,38 @@ export type Database = {
         };
         Returns: string;
       };
+      save_classroom: {
+        Args: {
+          p_data: Json;
+          p_id: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
+      save_course: {
+        Args: {
+          p_data: Json;
+          p_id: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
+      save_course_setting: {
+        Args: {
+          p_active?: boolean;
+          p_id: string;
+          p_kind: string;
+          p_name: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
       save_customer: {
         Args: {
           p_branches: string[];
@@ -3095,6 +3472,18 @@ export type Database = {
           p_phone: string;
           p_relationship: string;
           p_tenant: string;
+        };
+        Returns: string;
+      };
+      set_academic_active: {
+        Args: {
+          p_active: boolean;
+          p_id: string;
+          p_kind: string;
+          p_reason?: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
         };
         Returns: string;
       };
