@@ -21,7 +21,8 @@ export const modules = [
   {
     slug: "attendance",
     title: "Attendance",
-    description: "Lesson attendance and participation records.",
+    description:
+      "Reviewed lesson rosters, draft/final attendance and audited corrections.",
     category: "Learning",
   },
   {

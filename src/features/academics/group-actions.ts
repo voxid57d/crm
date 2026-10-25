@@ -85,6 +85,7 @@ function refresh() {
     "/courses",
     "/academics",
     "/customers",
+    "/attendance",
   ])
     revalidatePath(path, "layout");
 }

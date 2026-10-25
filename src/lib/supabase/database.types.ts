@@ -96,6 +96,88 @@ export type Database = {
           },
         ];
       };
+      attendance_events: {
+        Row: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data: Json | null;
+          branch_id: string;
+          created_at: string;
+          group_id: string;
+          id: string;
+          lesson_id: string;
+          operation: string;
+          reason: string;
+          record_id: string | null;
+          sheet_id: string;
+          sheet_version: number;
+          tenant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id: string;
+          actor_name: string;
+          after_data: NonNullable<Json>;
+          before_data?: Json | null;
+          branch_id: string;
+          created_at?: string;
+          group_id: string;
+          id?: string;
+          lesson_id: string;
+          operation: string;
+          reason?: string;
+          record_id?: string | null;
+          sheet_id: string;
+          sheet_version: number;
+          tenant_id: string;
+        };
+        Update: {
+          actor_id?: string;
+          actor_name?: string;
+          after_data?: NonNullable<Json>;
+          before_data?: Json | null;
+          branch_id?: string;
+          created_at?: string;
+          group_id?: string;
+          id?: string;
+          lesson_id?: string;
+          operation?: string;
+          reason?: string;
+          record_id?: string | null;
+          sheet_id?: string;
+          sheet_version?: number;
+          tenant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "attendance_events_tenant_id_record_id_fkey";
+            columns: ["tenant_id", "record_id"];
+            isOneToOne: false;
+            referencedRelation: "lesson_attendance_records";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "attendance_events_tenant_id_sheet_id_lesson_id_group_id_br_fkey";
+            columns: [
+              "tenant_id",
+              "sheet_id",
+              "lesson_id",
+              "group_id",
+              "branch_id",
+            ];
+            isOneToOne: false;
+            referencedRelation: "lesson_attendance_sheets";
+            referencedColumns: [
+              "tenant_id",
+              "id",
+              "lesson_id",
+              "group_id",
+              "branch_id",
+            ];
+          },
+        ];
+      };
       branch_memberships: {
         Row: {
           branch_id: string;
@@ -2474,6 +2556,182 @@ export type Database = {
           },
         ];
       };
+      lesson_attendance_records: {
+        Row: {
+          branch_id: string;
+          created_at: string;
+          customer_id: string;
+          enrollment_id: string;
+          group_id: string;
+          id: string;
+          is_expected: boolean;
+          late_minutes: number | null;
+          lesson_id: string;
+          marked_at: string | null;
+          marked_by: string | null;
+          marked_employee_id: string | null;
+          notes: string;
+          sheet_id: string;
+          status: string;
+          tenant_id: string;
+          updated_at: string;
+          updated_by: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          created_at?: string;
+          customer_id: string;
+          enrollment_id: string;
+          group_id: string;
+          id?: string;
+          is_expected?: boolean;
+          late_minutes?: number | null;
+          lesson_id: string;
+          marked_at?: string | null;
+          marked_by?: string | null;
+          marked_employee_id?: string | null;
+          notes?: string;
+          sheet_id: string;
+          status?: string;
+          tenant_id: string;
+          updated_at?: string;
+          updated_by: string;
+        };
+        Update: {
+          branch_id?: string;
+          created_at?: string;
+          customer_id?: string;
+          enrollment_id?: string;
+          group_id?: string;
+          id?: string;
+          is_expected?: boolean;
+          late_minutes?: number | null;
+          lesson_id?: string;
+          marked_at?: string | null;
+          marked_by?: string | null;
+          marked_employee_id?: string | null;
+          notes?: string;
+          sheet_id?: string;
+          status?: string;
+          tenant_id?: string;
+          updated_at?: string;
+          updated_by?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lesson_attendance_records_tenant_id_enrollment_id_customer_fkey";
+            columns: [
+              "tenant_id",
+              "enrollment_id",
+              "customer_id",
+              "group_id",
+              "branch_id",
+            ];
+            isOneToOne: false;
+            referencedRelation: "student_enrollments";
+            referencedColumns: [
+              "tenant_id",
+              "id",
+              "customer_id",
+              "group_id",
+              "branch_id",
+            ];
+          },
+          {
+            foreignKeyName: "lesson_attendance_records_tenant_id_marked_employee_id_fkey";
+            columns: ["tenant_id", "marked_employee_id"];
+            isOneToOne: false;
+            referencedRelation: "employees";
+            referencedColumns: ["tenant_id", "id"];
+          },
+          {
+            foreignKeyName: "lesson_attendance_records_tenant_id_sheet_id_lesson_id_gro_fkey";
+            columns: [
+              "tenant_id",
+              "sheet_id",
+              "lesson_id",
+              "group_id",
+              "branch_id",
+            ];
+            isOneToOne: false;
+            referencedRelation: "lesson_attendance_sheets";
+            referencedColumns: [
+              "tenant_id",
+              "id",
+              "lesson_id",
+              "group_id",
+              "branch_id",
+            ];
+          },
+        ];
+      };
+      lesson_attendance_sheets: {
+        Row: {
+          branch_id: string;
+          corrected_at: string | null;
+          corrected_by: string | null;
+          correction_count: number;
+          created_at: string;
+          created_by: string;
+          finalized_at: string | null;
+          finalized_by: string | null;
+          group_id: string;
+          id: string;
+          lesson_id: string;
+          roster_reviewed_at: string;
+          state: string;
+          tenant_id: string;
+          updated_at: string;
+          version: number;
+        };
+        ComputedFields: never;
+        Insert: {
+          branch_id: string;
+          corrected_at?: string | null;
+          corrected_by?: string | null;
+          correction_count?: number;
+          created_at?: string;
+          created_by: string;
+          finalized_at?: string | null;
+          finalized_by?: string | null;
+          group_id: string;
+          id?: string;
+          lesson_id: string;
+          roster_reviewed_at?: string;
+          state?: string;
+          tenant_id: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Update: {
+          branch_id?: string;
+          corrected_at?: string | null;
+          corrected_by?: string | null;
+          correction_count?: number;
+          created_at?: string;
+          created_by?: string;
+          finalized_at?: string | null;
+          finalized_by?: string | null;
+          group_id?: string;
+          id?: string;
+          lesson_id?: string;
+          roster_reviewed_at?: string;
+          state?: string;
+          tenant_id?: string;
+          updated_at?: string;
+          version?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "lesson_attendance_sheets_tenant_id_lesson_id_group_id_bran_fkey";
+            columns: ["tenant_id", "lesson_id", "group_id", "branch_id"];
+            isOneToOne: false;
+            referencedRelation: "lessons";
+            referencedColumns: ["tenant_id", "id", "group_id", "branch_id"];
+          },
+        ];
+      };
       lesson_expected_students: {
         Row: {
           branch_id: string;
@@ -3734,6 +3992,32 @@ export type Database = {
         };
         Returns: undefined;
       };
+      attendance_lesson_directory: {
+        Args: { p_filters: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
+      attendance_options: { Args: { p_tenant: string }; Returns: Json };
+      attendance_record_directory: {
+        Args: { p_filters: Json; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
+      attendance_sheet_details: {
+        Args: {
+          p_history_page?: number;
+          p_lesson: string;
+          p_page?: number;
+          p_tenant: string;
+        };
+        Returns: Json;
+      };
+      attendance_sheet_history: {
+        Args: { p_lesson: string; p_page?: number; p_tenant: string };
+        Returns: Json;
+      };
+      can_view_attendance: {
+        Args: { p_lesson: string; p_tenant: string };
+        Returns: boolean;
+      };
       cashbox_details: {
         Args: {
           p_audit_page?: number;
@@ -3944,6 +4228,16 @@ export type Database = {
         Returns: Json;
       };
       expense_category_directory: { Args: { p_tenant: string }; Returns: Json };
+      finalize_attendance_sheet: {
+        Args: {
+          p_confirm_empty?: boolean;
+          p_lesson: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
       finance_operation_options: {
         Args: { p_branch?: string; p_kind: string; p_tenant: string };
         Returns: Json;
@@ -4212,7 +4506,20 @@ export type Database = {
         };
         Returns: string;
       };
+      prepare_attendance_sheet: {
+        Args: { p_lesson: string; p_request: string; p_tenant: string };
+        Returns: string;
+      };
       preview_employee_invitation: { Args: { p_token: string }; Returns: Json };
+      refresh_attendance_roster: {
+        Args: {
+          p_lesson: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
+      };
       reorder_sales_stages: {
         Args: { p_pipeline: string; p_stages: string[]; p_tenant: string };
         Returns: undefined;
@@ -4275,6 +4582,18 @@ export type Database = {
       sales_followup_directory: {
         Args: { p_filters?: Json; p_page?: number; p_tenant: string };
         Returns: Json;
+      };
+      save_attendance_marks: {
+        Args: {
+          p_correct?: boolean;
+          p_lesson: string;
+          p_marks: Json;
+          p_reason?: string;
+          p_request: string;
+          p_tenant: string;
+          p_version: number;
+        };
+        Returns: string;
       };
       save_business_role: {
         Args: {

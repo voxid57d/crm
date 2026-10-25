@@ -45,28 +45,30 @@ export function AppShell({
                   ? "Students"
                   : pathname.startsWith("/academics")
                     ? "Academic overview"
-                    : pathname.startsWith("/courses")
-                      ? "Courses"
-                      : pathname.startsWith("/lessons")
-                        ? "Lessons"
-                        : pathname.startsWith("/timetable")
-                          ? "Timetable"
-                          : pathname.startsWith("/groups")
-                            ? "Groups"
-                            : pathname.startsWith("/enrollments")
-                              ? "Enrollments"
-                              : pathname.startsWith("/classrooms")
-                                ? "Classrooms"
-                                : pathname.startsWith("/employees")
-                                  ? "Employees"
-                                  : pathname === "/roles"
-                                    ? "Roles & permissions"
-                                    : pathname.startsWith("/sales") ||
-                                        pathname.startsWith("/leads")
-                                      ? "Sales CRM"
-                                      : pathname.startsWith("/finance")
-                                        ? "Finance"
-                                        : "Modules";
+                    : pathname.startsWith("/attendance")
+                      ? "Attendance"
+                      : pathname.startsWith("/courses")
+                        ? "Courses"
+                        : pathname.startsWith("/lessons")
+                          ? "Lessons"
+                          : pathname.startsWith("/timetable")
+                            ? "Timetable"
+                            : pathname.startsWith("/groups")
+                              ? "Groups"
+                              : pathname.startsWith("/enrollments")
+                                ? "Enrollments"
+                                : pathname.startsWith("/classrooms")
+                                  ? "Classrooms"
+                                  : pathname.startsWith("/employees")
+                                    ? "Employees"
+                                    : pathname === "/roles"
+                                      ? "Roles & permissions"
+                                      : pathname.startsWith("/sales") ||
+                                          pathname.startsWith("/leads")
+                                        ? "Sales CRM"
+                                        : pathname.startsWith("/finance")
+                                          ? "Finance"
+                                          : "Modules";
   return (
     <div className="min-h-screen">
       <a

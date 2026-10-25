@@ -7,6 +7,7 @@ export default function AcademicError({ reset }: { reset: () => void }) {
   const path =
     [
       "/academics",
+      "/attendance",
       "/classrooms",
       "/groups",
       "/enrollments",

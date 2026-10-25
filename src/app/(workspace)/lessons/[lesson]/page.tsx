@@ -25,6 +25,14 @@ export default async function LessonProfile({
     { workspace: w, detail: d } = await getLesson(id, page),
     l = d.lesson,
     roster = d.can_roster ? await expectedRoster(id, rp) : null;
+  const attendance = await w.supabase.rpc("can_view_attendance", {
+    p_tenant: w.tenant.id,
+    p_lesson: id,
+  });
+  if (attendance.error)
+    throw new Error(
+      "Attendance access could not load. Check local migrations and services.",
+    );
   return (
     <div className="space-y-6">
       <Link href="/lessons" className="text-primary underline">
@@ -48,6 +56,11 @@ export default async function LessonProfile({
         </p>
       )}
       <div className="flex flex-wrap gap-3">
+        {attendance.data && (
+          <Button asChild variant="outline">
+            <Link href={`/lessons/${id}/attendance`}>Attendance sheet</Link>
+          </Button>
+        )}
         {d.can_open_group && (
           <Button asChild variant="outline">
             <Link href={`/groups/${l.group_id}`}>Group and enrollments</Link>
@@ -136,7 +149,9 @@ export default async function LessonProfile({
               {roster.captured_at
                 ? `Captured ${academicDate(roster.captured_at, w.tenant.timezone)}.`
                 : "Preview based on current enrollment status and effective dates; saved when the lesson starts or completes."}{" "}
-              This is an expected list, not attendance.
+              This is the lesson&apos;s expected list, not attendance.
+              Attendance uses a separately reviewed historical enrollment
+              roster.
             </p>
             <ul className="space-y-2 rounded-xl border bg-white p-5">
               {roster.rows.map((s) => (

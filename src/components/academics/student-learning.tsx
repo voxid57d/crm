@@ -177,10 +177,16 @@ export async function StudentLearning({
       >
         <h2 className="text-xl font-semibold">Attendance</h2>
         <p className="text-sm text-muted-foreground">
-          Attendance marking and attendance reports are planned for Step 8.
-          Lesson completion and expected rosters do not record student
-          attendance.
+          Core attendance is available from each authorized lesson and the
+          Attendance workspace. Student Profile attendance summaries and rates
+          are planned for 8D. Lesson completion does not mark attendance.
         </p>
+        <Link
+          className="text-sm text-primary underline"
+          href={`/attendance/history?student=${student}&branch=`}
+        >
+          View authorized attendance history
+        </Link>
       </section>
     </>
   );

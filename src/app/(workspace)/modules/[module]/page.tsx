@@ -36,6 +36,7 @@ export default async function ModulePage({
   if (slug === "students") redirect("/students");
   if (slug === "courses") redirect("/courses");
   if (slug === "schedule") redirect("/timetable");
+  if (slug === "attendance") redirect("/attendance");
   if (slug === "leads") redirect("/leads");
   if (slug === "finance") redirect("/finance");
   const entry = modules.find((item) => item.slug === slug);

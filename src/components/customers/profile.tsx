@@ -532,8 +532,7 @@ export async function ContactProfile({
             </h2>
             <p className="mt-3 text-sm text-muted-foreground">
               Add a Student Profile through the existing Add Student workflow to
-              use groups, enrollments and lessons. Attendance is planned for
-              Step 8.
+              use groups, enrollments, lessons and attendance.
             </p>
           </section>
         )}

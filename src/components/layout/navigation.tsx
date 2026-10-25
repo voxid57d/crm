@@ -36,7 +36,7 @@ const groups = [
       { href: "/classrooms", label: "Classrooms", icon: Building2 },
       { href: "/lessons", label: "Lessons", icon: BookOpen },
       { href: "/timetable", label: "Timetable", icon: CalendarDays },
-      { href: "/modules/attendance", label: "Attendance", icon: CheckSquare2 },
+      { href: "/attendance", label: "Attendance", icon: CheckSquare2 },
     ],
   },
   {

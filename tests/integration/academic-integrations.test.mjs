@@ -323,7 +323,7 @@ test("local academic dashboard, student timetable and enrollment invoice workflo
         "Academic activity",
         "Student lessons and timetable",
         "Linked enrollment charges",
-        "Attendance marking",
+        "Core attendance",
         `/finance/invoices/${original}`,
         `/enrollments/${enrollment}`,
         `/enrollments/${secondEnrollment}`,

@@ -100,6 +100,7 @@ function refresh() {
     "/academics",
     "/students",
     "/customers",
+    "/attendance",
   ])
     revalidatePath(path, "layout");
 }

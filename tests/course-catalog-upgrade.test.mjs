@@ -3,20 +3,22 @@ import assert from "node:assert/strict";
 import { readFile, readdir } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { createTestDatabase } from "./helpers/database.mjs";
-for (const phase of ["7A", "7B", "7C", "7D"])
+for (const phase of ["7A", "7B", "7C", "7D", "8A"])
   test(`${phase} populated upgrade preserves student, guardians, conversion, salary and posted financial history`, async (t) => {
     const directory = new URL("../supabase/migrations/", import.meta.url),
       files = (await readdir(directory))
         .filter(
           (f) =>
             f.endsWith(".sql") &&
-            (phase === "7D" ||
+            (phase === "8A" ||
               f <
-                (phase === "7C"
-                  ? "20261026000100"
-                  : phase === "7B"
-                    ? "20261025000900"
-                    : "20261025000400")),
+                (phase === "7D"
+                  ? "20261026000400"
+                  : phase === "7C"
+                    ? "20261026000100"
+                    : phase === "7B"
+                      ? "20261025000900"
+                      : "20261025000400")),
         )
         .sort(),
       boundary = files.findIndex((f) =>
@@ -27,7 +29,9 @@ for (const phase of ["7A", "7B", "7C", "7D"])
               ? "20261025000400"
               : phase === "7C"
                 ? "20261025000900"
-                : "20261026000100",
+                : phase === "7D"
+                  ? "20261026000100"
+                  : "20261026000400",
         ),
       );
     assert.ok(boundary > 0);
@@ -193,7 +197,7 @@ for (const phase of ["7A", "7B", "7C", "7D"])
       await db.exec("set role authenticated");
       return result;
     };
-    if (["7C", "7D"].includes(phase)) {
+    if (["7C", "7D", "8A"].includes(phase)) {
       priorCourse = (
         await rows("select public.save_course($1,null,$2,0,$3) id", [
           tenant,
@@ -253,7 +257,7 @@ for (const phase of ["7A", "7B", "7C", "7D"])
           ],
         )
       )[0].id;
-      if (phase === "7D")
+      if (["7D", "8A"].includes(phase))
         priorLesson = (
           await rows(
             "select public.save_lesson($1,$2,null,$3,0,$4,'Existing scheduled lesson') id",
@@ -289,7 +293,50 @@ for (const phase of ["7A", "7B", "7C", "7D"])
       await db.exec(await readFile(new URL(file, directory), "utf8"));
     await db.exec("set role authenticated");
     assert.deepEqual(await snapshot(), before);
-    if (phase === "7D") {
+    if (phase === "8A") {
+      assert.equal(
+        (
+          await rows(
+            "select count(*)::integer n from public.lesson_attendance_sheets",
+          )
+        )[0].n,
+        0,
+      );
+      const current = (
+        await rows(
+          "select public.save_lesson($1,$2,null,$3,0,$4,'Existing student attendance') id",
+          [
+            tenant,
+            priorGroup,
+            randomUUID(),
+            {
+              local_start: today + "T00:00",
+              local_end: today + "T00:01",
+              timezone: "Asia/Tashkent",
+              teacher_id: employee,
+              title: "Reviewed attendance after upgrade",
+            },
+          ],
+        )
+      )[0].id;
+      await rows("select public.prepare_attendance_sheet($1,$2,$3)", [
+        tenant,
+        current,
+        randomUUID(),
+      ]);
+      const attendance = (
+        await rows("select public.attendance_sheet_details($1,$2) v", [
+          tenant,
+          current,
+        ])
+      )[0].v;
+      assert.equal(attendance.rows[0].customer_id, student);
+      assert.equal(attendance.rows[0].enrollment_id, priorEnrollment);
+      assert.equal(attendance.rows[0].status, "unmarked");
+      assert.equal(attendance.counts.absent, 0);
+      assert.deepEqual(await academicSnapshot(), priorAcademic);
+    }
+    if (["7D", "8A"].includes(phase)) {
       const overview = (
         await rows("select public.student_academic_summary($1,$2) v", [
           tenant,
@@ -309,7 +356,7 @@ for (const phase of ["7A", "7B", "7C", "7D"])
       );
       assert.deepEqual(await academicSnapshot(), priorAcademic);
     }
-    if (["7C", "7D"].includes(phase)) {
+    if (["7C", "7D", "8A"].includes(phase)) {
       assert.deepEqual(await academicSnapshot(), priorAcademic);
       const tomorrow = (await rows("select ($1::date+1)::text d", [today]))[0]
           .d,
